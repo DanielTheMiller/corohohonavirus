@@ -1,0 +1,32 @@
+#ammoDetails {
+    position: absolute;
+    right:0px;
+    bottom: 0px;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+.ammoBar {
+    border: solid black 1px;
+    margin: 0.5em 0;
+    padding: 0 0.5em;
+}
+
+h3 {
+    margin: 0;
+}
+
+#fireButton {
+    display: inline-block;
+    width: 5em;
+    height: 5em;
+    border-radius: 3em;
+    background-color: red;
+    text-align: center;
+}
+
+#fireButton > p {
+    margin: 1.85em 0;
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none; /* Standard syntax */
+}
