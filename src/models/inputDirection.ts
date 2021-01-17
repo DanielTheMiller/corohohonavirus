@@ -17,7 +17,7 @@ export class InputDirections {
     getWalkDirFromInput(vector: Vector2d, isNPC: boolean = false): void{
         let accelerationSpeed = this.sprint ? 2 : 1;
         let maxSpeed = this.sprint ? MAX_SPRINT_SPEED : MAX_SPEED;
-        maxSpeed = isNPC ? maxSpeed - 1 : maxSpeed; 
+        maxSpeed = isNPC ? maxSpeed - 2 : maxSpeed; 
         let xDir = (this.left ? -accelerationSpeed : 0) + (this.right ? accelerationSpeed : 0);
         let yDir = (this.up ? -accelerationSpeed : 0) + (this.down ? accelerationSpeed : 0);
         if (vector.x > 0 && xDir == 0) xDir = -1;

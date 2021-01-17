@@ -4,13 +4,13 @@ import { Elf } from 'src/models/elf';
 import { InputDirections } from 'src/models/inputDirection';
 import { Vector2d } from 'src/models/vector2d';
 import * as nipplejs from 'nipplejs';
-import { AssetManager, GameImage, ImageRef } from 'src/models/assetManager';
+import { AssetManager, ImageRef } from 'src/models/assetManager';
 import { Weapon, WeaponType } from 'src/models/weapon';
 import { RefillStation } from 'src/models/refillStation';
 import { ProjectileType } from 'src/models/projectile';
 import { GridManager } from 'src/models/GridManager';
 
-const ELF_SPAWN_INTERVAL: number = 25000;
+const ELF_SPAWN_INTERVAL: number = 2500;
 const REFILL_SPAWN_INTERVAL: number = 15000;
 const SPREADING_INTERVAL: number = 1000
 
@@ -125,7 +125,7 @@ export class GameCanvasComponent implements AfterViewInit {
       let randomIndex = Math.ceil(Math.random()*aliveOffscreen);
       switch(true){
         case(randomIndex <= healthyOffscreen):{
-          elf = new Elf(this, true, spawnOffset, false);
+          elf = new Elf(this, true, spawnOffset, false, true);
           break;
         }
         case(randomIndex-healthyOffscreen <= illOffscreen):{

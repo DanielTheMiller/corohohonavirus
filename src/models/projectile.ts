@@ -20,7 +20,7 @@ export class Projectile {
         this.createdTime = new Date().getTime();
         this.type = type;
         this.position = parent.gameCanvas.pos.getInverse();
-        this.direction = parent.gameCanvas.mainElf.lookDir.getInverse().multiplyThis(15);
+        this.direction = parent.gameCanvas.mainElf.lookDir.multiplyThis(15);
         console.log("LookDir", this.direction);
         switch(type){
             case(ProjectileType.SYRINGE):

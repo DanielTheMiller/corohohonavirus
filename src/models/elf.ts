@@ -9,13 +9,16 @@ const NO_OF_FRONT_WALK_FRAMES = 8;
 const TIME_BETWEEN_STEPS: number = 200;
 const TIME_TO_BE_ISOLATED: number = 10000;
 const INFECTION_LIFETIME: number = 15000;
+var noOfElvesSpawned: number = 0;
 
 export class Elf {
+    id: number;
     alive: boolean = true;
     isolated: boolean = false;
     vacinated: boolean = false;
     ill: boolean = false;
     contactedIllElf: boolean = false;
+    _keepStill: boolean = false;
 
     isNPC: boolean = false;
     position: Vector2d;
@@ -53,13 +56,15 @@ export class Elf {
 
     lastShotMade: number = 0;
 
-    constructor(gameComponent: GameCanvasComponent, npc: boolean = false, position: Vector2d = new Vector2d(), isInfected=false){
+    constructor(gameComponent: GameCanvasComponent, npc: boolean = false, position: Vector2d = new Vector2d(), isInfected=false, keepStill=false){
+        this.id = noOfElvesSpawned++;
         let assetManager = gameComponent.assetManager;
         this.gameComponent = gameComponent;
         this.position = position;
         this.isNPC = npc;
         this.icedImage = assetManager.getImage(ImageRef.NPC_ICED);
         this.ill = isInfected;
+        this._keepStill = keepStill;
         if (isInfected){
             this.timeInfected = new Date().getTime();            
         }
@@ -72,6 +77,7 @@ export class Elf {
             this.backWalkimage = assetManager.getImage(ImageRef.MAIN_BACK_WALK_CYCLE);
             this.walkDir = this.gameComponent.walkDir;
             this.position = this.gameComponent.pos;
+            this.dirInputs = this.gameComponent.inputDirection;
         } else {
             this.idleFrontImage = assetManager.getImage(ImageRef.NPC_IDLE_FRONT);
             this.idleBackImage = assetManager.getImage(ImageRef.NPC_IDLE_BACK);
@@ -92,7 +98,7 @@ export class Elf {
     move(){
         let thisTime = new Date().getTime();
         if (this.isNPC) {
-            if (this.alive && !this.isolated){
+            if (this.alive && !this.isolated && !this._keepStill){
                 if (thisTime - this.lastChangeOfDirection > 500){
                     switch(Math.ceil(Math.random()*5)){//Change direction
                         case 1:
@@ -152,7 +158,7 @@ export class Elf {
         }
         if (footprintRequired){
             let pos = !this.isNPC ? this.position.getInverse() : this.position;
-            this.footprints.push(new Footprint(this, new Vector2d(pos.x + (this.stepOffset ? 20 : -20), pos.y + 70)));
+            this.footprints.push(new Footprint(this, new Vector2d(pos.x + (this.stepOffset ? 20 : -20), pos.y - 70)));
             this.stepOffset = !this.stepOffset;
         }
     }
@@ -207,19 +213,15 @@ export class Elf {
     }
 
     render(){
-        let walkDir = this.walkDir.getInverse();//this.isNPC ? this.walkDir.getInverse() : this.gameComponent.walkDir;
-        let lookDir = this.lookDir.getInverse();//this.isNPC ? this.lookDir.getInverse() : this.lookDir;
-        let lookDirX = lookDir.x;
-        let sprinting = this.isNPC ? this.dirInputs.sprint : this.gameComponent.inputDirection.sprint;
+        let lookDirX = this.lookDir.x;
+        let sprinting = this.dirInputs.sprint;
         let facingDirection = Math.sign(lookDirX);
         facingDirection = facingDirection == 0 ? 1 : facingDirection;
-        this.gameComponent.context.setTransform(1,0,0,1,0,0);
-        this.gameComponent.context.translate(Math.floor(this.gameComponent.myCanvas.nativeElement.width / 2), Math.floor(this.gameComponent.myCanvas.nativeElement.height / 2));
+        
         for (let fIndex = 0; fIndex < this.footprints.length; fIndex++) {
             let footprint = this.footprints[fIndex];
             footprint.draw()
         }
-        this.gameComponent.context.scale(facingDirection, 1);
         
         let destX = 0;
         let destY = 0;
@@ -230,7 +232,7 @@ export class Elf {
         let destWidth = this.idleFrontImage.width/2*facingDirection;
         let destHeight = this.idleFrontImage.height/2;
 
-        if (walkDir.isZero()){
+        if (this.walkDir.isZero()){
             //Idle;
             if (this.isolated){
                 this.currentImage = this.icedImage;
@@ -244,9 +246,9 @@ export class Elf {
                 srcHeight = this.deadImage.height; 
                 destWidth = this.deadImage.width/2;
                 destHeight = this.deadImage.height/2;
-            } else if (this.lookDir.isZero() || this.lookDir.y == -1){
+            } else if (this.lookDir.isZero() || this.lookDir.y == 1) {
                 this.currentImage = this.idleFrontImage;
-            }else if (this.lookDir.y == 1){
+            }else if (this.lookDir.y == -1){
                 this.currentImage = this.idleBackImage;
             }else{
                 this.currentImage = this.idleSideImage;
@@ -258,14 +260,14 @@ export class Elf {
             //Work out which directions animation to use
             let headingSideways = false;
             let directionChanged: boolean = false;
-            if (walkDir.x != 0){//Left/Right animation
+            if (this.walkDir.x != 0){//Left/Right animation
                 headingSideways = true;
                 directionChanged = this.currentImage != this.sideWalkImage;
                 this.currentImage = this.sideWalkImage;
-            }else if (walkDir.y < 0){
-                this.currentImage = this.frontWalkImage;
+            }else if (this.walkDir.y < 0){
+                this.currentImage = this.backWalkimage;
             }else{
-                this.currentImage = this.backWalkimage
+                this.currentImage = this.frontWalkImage
             }
             this.holdFrame = sprinting ? false : !this.holdFrame;
             this.currentFrame =  directionChanged ? 0 : this.currentFrame;
@@ -274,15 +276,16 @@ export class Elf {
             this.currentFrame = (this.currentFrame+(this.holdFrame?0:1))%noOfWalkingFrames;
         }
 
-        if (!this.isNPC){//Main character
-            destX = -(this.idleFrontImage.width/4)*facingDirection;
-            destY = -this.idleFrontImage.height/4;
-        }else{
-            destX = (srcWidth/4+this.position.x)*facingDirection-this.gameComponent.pos.x;
-            destY = srcHeight/4+this.position.y-this.gameComponent.pos.y;
+        if (this.isNPC) {
+            destX = (this.position.x-this.gameComponent.pos.x)*facingDirection;
+            destY = this.position.y-this.gameComponent.pos.y;
         }
 
         //console.log(srcImage, srcX, srcY, this.frameWidth, this.frameHeight, destX, destY, destHeight, destHeight)
+        
+        this.gameComponent.context.setTransform(1,0,0,1,0,0);
+        this.gameComponent.context.translate(Math.floor(this.gameComponent.myCanvas.nativeElement.width / 2-srcWidth/4), Math.floor(this.gameComponent.myCanvas.nativeElement.height / 2-srcHeight/4));
+        this.gameComponent.context.scale(facingDirection, 1);
         this.gameComponent.context.drawImage(
             this.currentImage,
             srcX,
@@ -310,7 +313,9 @@ export class Elf {
                 destY - 50
             )
         }
-        
-        this.gameComponent.context.scale(1,1);
+        this.gameComponent.context.scale(facingDirection, 1);
+        this.gameComponent.context.fillStyle = `rgba(0, 0, 0)`;
+        this.gameComponent.context.fillText(`${this.id} - ${this.position.toString()}`, destX, destY);
+        this.gameComponent.context.fillText(`${destX} ${destY}`, destX, destY+20);
     }
 }

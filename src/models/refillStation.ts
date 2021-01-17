@@ -36,8 +36,8 @@ export class RefillStation{
         this.gameCanvas.context.translate(Math.floor(this.gameCanvas.myCanvas.nativeElement.width / 2), Math.floor(this.gameCanvas.myCanvas.nativeElement.height / 2));
         this.gameCanvas.context.drawImage(
             this.pickedUp ? this.stationEmptyImage : this.stationImage,
-            this.gameCanvas.pos.x-this.size.x/2+this.position.x,
-            this.gameCanvas.pos.y-this.size.y/2+this.position.y);
+            -this.gameCanvas.pos.x-this.size.x/2+this.position.x,
+            -this.gameCanvas.pos.y-this.size.y/2+this.position.y);
         this.gameCanvas.context.fill();        
     }
 
