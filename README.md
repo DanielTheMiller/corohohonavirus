@@ -13,6 +13,7 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 
 ## BUGS:
 
+- Shooting an elf isolates them and then kills them
 - Ammo bars don't reflect ammunition count
 - Elves and stations are spawning on-screen
 - Footprints dissapear intantly if an elf despawns (need to be referenced globally)
