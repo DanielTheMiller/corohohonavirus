@@ -34,8 +34,8 @@ export class GridManager {
     }
 
     newGrid(){
-        for (let y = 0; y < CELLS_Y; y++){
-            for (let x = 0; x < CELLS_X; x++){
+        for (let y = -1; y < CELLS_Y+1; y++){
+            for (let x = -1; x < CELLS_X+1; x++){
                 this.grid.push(new GridCell(new Vector2d(x, y)));
             }
         }
@@ -91,10 +91,12 @@ export class GridManager {
     }
 
     getCoordsFromRelativePosition(relativePos: Vector2d): Vector2d {
-        if (relativePos.x < 0 || relativePos.y < 0 || relativePos.x > this.width || relativePos.y > this.height){
+        let X = Math.floor(relativePos.x/this.cellSize.x);
+        let Y = Math.floor(relativePos.y/this.cellSize.y);
+        if (X < -1 || X > CELLS_X +1 || Y < -1 || Y > CELLS_Y + 1){
             return null;
         }
-        return new Vector2d(Math.floor(relativePos.x/this.cellSize.x), Math.floor(relativePos.y/this.cellSize.y));
+        return new Vector2d(X, Y);
     }
 
     addElf(elf: Elf) {
@@ -103,8 +105,10 @@ export class GridManager {
             let gridCell: GridCell = this.getCell(theseCoords);
             if (gridCell != null){ 
                 gridCell.elves.push(elf);
-            }else{
-                console.log(`Invalid coords ${theseCoords}`);
+            }else if (elf.isNPC){
+                //Invalid position. Despawning
+                console.log("Invalid position, despawning ",elf.id);
+                elf.despawn();
             }
         }
     }

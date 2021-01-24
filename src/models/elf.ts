@@ -125,9 +125,6 @@ export class Elf {
             }else if (this.isolate &&  thisTime - this.timeIsolated > TIME_TO_BE_ISOLATED){
                 this.isolated = false;
             }
-            if (!this.gameComponent.itemIsInViewport(this.position, new Vector2d(this.frameWidth, this.frameHeight))){
-                this.gameComponent.removeElf(this);
-            }
             if (this.ill){
                 if (thisTime - this.timeInfected > INFECTION_LIFETIME){
                     if (Math.ceil(Math.random()*100)<=5) {
@@ -210,6 +207,10 @@ export class Elf {
             this.vacinated = true;
             this.gameComponent.vacinated++;
         }
+    }
+
+    despawn() {
+        this.gameComponent.removeElf(this);
     }
 
     render(){

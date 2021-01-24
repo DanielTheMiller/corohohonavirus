@@ -342,24 +342,6 @@ export class GameCanvasComponent implements AfterViewInit {
     }
   }
 
-  //Assumes center point of this character 
-  itemIsInViewport(position: Vector2d, dimensions: Vector2d):boolean {
-    return true;
-    let relativePos = position.add(this.pos.getInverse());
-    relativePos.translate(new Vector2d(-this.myCanvas.nativeElement.width/2, -this.myCanvas.nativeElement.height/2));
-    let inViewport = true;
-    if (relativePos.x+(dimensions.x) < 0){
-      inViewport = false;
-    } else if (relativePos.x-(dimensions.x) > this.myCanvas.nativeElement.width){
-      inViewport = false;
-    } else if (relativePos.y-(dimensions.y) > this.myCanvas.nativeElement.height){
-      inViewport = false;
-    } else if (relativePos.y+(dimensions.y) < 0){
-      inViewport = false;
-    }
-    return inViewport;
-  }
-
   fireButtonChange(change: boolean){
     this.inputDirection.fire = change;
   }
