@@ -128,11 +128,11 @@ export class GameCanvasComponent implements AfterViewInit {
           elf = new Elf(this, true, spawnOffset, false, false);
           break;
         }
-        case(randomIndex-healthyOffscreen <= illOffscreen):{
+        /*case(randomIndex-healthyOffscreen <= illOffscreen):{
           //SPAWN ILL
           elf = new Elf(this, true, spawnOffset, true);
           break;
-        }
+        }*/
         case (randomIndex-healthyOffscreen-illOffscreen <= immunisedOffscreen):{
           //SPAWN IMUNISED
           elf = new Elf(this,true,spawnOffset,false);
@@ -285,7 +285,7 @@ export class GameCanvasComponent implements AfterViewInit {
     for (let elfIndex = 0; elfIndex < this.elves.length; elfIndex++)
     {
       let elf = this.elves[elfIndex];
-      elf.move();
+      elf?.move();//Has crashed before without nullcheck
     }
     // For performance reasons, we will first map to a temp array, sort and map the temp array to the objects array.
     let elvesMap = this.elves.map(function (el, index) {
@@ -362,7 +362,6 @@ export class GameCanvasComponent implements AfterViewInit {
 
   fireButtonChange(change: boolean){
     this.inputDirection.fire = change;
-    console.log("Game firing" , change);
   }
 
   toggleWeapon(){

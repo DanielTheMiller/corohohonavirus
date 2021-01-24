@@ -26,7 +26,6 @@ export class InputDirections {
         if (vector.y < 0 && yDir == 0) yDir = 1;
         vector.setX(clamp(vector.x+xDir, -maxSpeed, maxSpeed));
         vector.setY(clamp(vector.y+yDir, -maxSpeed, maxSpeed));
-        if (!isNPC) console.log("Current MAIN direction", vector.toString());
     }
 
     reset(): void{

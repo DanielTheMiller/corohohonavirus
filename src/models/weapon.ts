@@ -54,7 +54,6 @@ export class Weapon {
     }
 
     fire(): void {
-        console.log("WEAPON FIRE!!")
         //Start shootin'
         if (this.gameCanvas.inputDirection.fire && this.ammo > 0 && new Date().getTime() - this.lastFiredTime > TIME_BETWEEN_SHOTS){//If they are firing, and if time has passed, and if they have ammo
             this.firedBullets.push(new Projectile(this, this.projectileType));

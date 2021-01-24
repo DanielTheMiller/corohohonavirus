@@ -19,9 +19,8 @@ export class Projectile {
         this.parent = parent;
         this.createdTime = new Date().getTime();
         this.type = type;
-        this.position = parent.gameCanvas.pos.getInverse();
-        this.direction = parent.gameCanvas.mainElf.lookDir.multiplyThis(15);
-        console.log("LookDir", this.direction);
+        this.position = parent.gameCanvas.pos.clone();
+        this.direction = parent.gameCanvas.mainElf.lookDir.clone().multiplyThis(15);
         switch(type){
             case(ProjectileType.SYRINGE):
                 this.image = this.parent.gameCanvas.assetManager.getImage(ImageRef.SYRINGE);
@@ -63,8 +62,8 @@ export class Projectile {
         this.parent.gameCanvas.context.translate(Math.floor(this.parent.gameCanvas.myCanvas.nativeElement.width / 2), Math.floor(this.parent.gameCanvas.myCanvas.nativeElement.height / 2));
         this.parent.gameCanvas.context.drawImage(
             this.image,
-            this.parent.gameCanvas.pos.x+this.position.x-this.size.x/2,
-            this.parent.gameCanvas.pos.y+this.position.y-this.size.y/2,
+            this.position.x-this.parent.gameCanvas.pos.x-this.size.x/2,
+            this.position.y-this.parent.gameCanvas.pos.y-this.size.y/2,
             this.size.x,
             this.size.y);
         this.parent.gameCanvas.context.fill();

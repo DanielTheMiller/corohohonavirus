@@ -75,7 +75,6 @@ export class GridManager {
     }
 
     clearGrid() {
-        console.log("Clearing grid")
         this.grid = [];
         this.newGrid();
     }
@@ -100,12 +99,10 @@ export class GridManager {
 
     addElf(elf: Elf) {
         let theseCoords: Vector2d = this.getCoordsFromPosition(elf.position);
-        console.log(elf.position?.toString(), theseCoords?.toString());
         if (theseCoords){//Null if position is invalid
             let gridCell: GridCell = this.getCell(theseCoords);
             if (gridCell != null){ 
                 gridCell.elves.push(elf);
-                console.log(`Currently ${gridCell.elves.length} elves`);
             }else{
                 console.log(`Invalid coords ${theseCoords}`);
             }
@@ -115,45 +112,45 @@ export class GridManager {
     //Elfs of interest
     searchByRadius(position: Vector2d, radius: number): Elf[] {
         let relativePos: Vector2d = this.getRelativePositionFromPosition(position);
-        let elvesToReturn: Elf[] = [];
         let coords: Vector2d = this.getCoordsFromRelativePosition(relativePos);
         if (coords == null){
             return [];
         }
-        elvesToReturn.concat(this.getElvesFromCell(coords));
+        let elvesToReturn: Elf[] = this.getElvesFromCell(coords);
         let includeLeftCell = relativePos.x % this.cellSize.x < radius;
         let includeRightCell = -relativePos.x % this.cellSize.x > radius;
         let includeTopCell = relativePos.y % this.cellSize.y < radius;
         let includeBottomCell = -relativePos.y % this.cellSize.y > radius;
         if (includeLeftCell){
-            elvesToReturn.concat(this.getElvesFromCell(coords.add(new Vector2d(-1,0))));
+            elvesToReturn = elvesToReturn.concat(this.getElvesFromCell(coords.add(new Vector2d(-1,0))));
         }
         if (includeRightCell){
-            elvesToReturn.concat(this.getElvesFromCell(coords.add(new Vector2d(1,0))));
+            elvesToReturn = elvesToReturn.concat(this.getElvesFromCell(coords.add(new Vector2d(1,0))));
         }
         if (includeTopCell){
-            elvesToReturn.concat(this.getElvesFromCell(coords.add(new Vector2d(0,-1))));
+            elvesToReturn = elvesToReturn.concat(this.getElvesFromCell(coords.add(new Vector2d(0,-1))));
         }
         if (includeBottomCell){
-            elvesToReturn.concat(this.getElvesFromCell(coords.add(new Vector2d(0,1))));
+            elvesToReturn = elvesToReturn.concat(this.getElvesFromCell(coords.add(new Vector2d(0,1))));
         }
         if (includeTopCell && includeLeftCell){
-            elvesToReturn.concat(this.getElvesFromCell(coords.add(new Vector2d(-1,-1))));
+            elvesToReturn = elvesToReturn.concat(this.getElvesFromCell(coords.add(new Vector2d(-1,-1))));
         }
         if (includeTopCell && includeRightCell){
-            elvesToReturn.concat(this.getElvesFromCell(coords.add(new Vector2d(1,1))));
+            elvesToReturn = elvesToReturn.concat(this.getElvesFromCell(coords.add(new Vector2d(1,1))));
         }
         if (includeBottomCell && includeLeftCell){
-            elvesToReturn.concat(this.getElvesFromCell(coords.add(new Vector2d(-1,1))));
+            elvesToReturn = elvesToReturn.concat(this.getElvesFromCell(coords.add(new Vector2d(-1,1))));
         }
         if (includeBottomCell && includeRightCell){
-            elvesToReturn.concat(this.getElvesFromCell(coords.add(new Vector2d(1,1))));
+            elvesToReturn = elvesToReturn.concat(this.getElvesFromCell(coords.add(new Vector2d(1,1))));
         }
         return elvesToReturn;
     }
 
     findFirstImpactedElf(globalPosition: Vector2d, radius: number, ignore: Elf[]): Elf{
         let relevantElves: Elf[] = this.searchByRadius(globalPosition, radius);
+        console.log("Found ",relevantElves.length," elves");
         for (let eIndex = 0; eIndex < relevantElves.length; eIndex++){
             let thisElf: Elf = relevantElves[eIndex];
             if (ignore.indexOf(thisElf) >= 0){//Blacklsted elf
