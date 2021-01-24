@@ -64,7 +64,18 @@ export class GridManager {
         return gridCell.elves;
     }
 
+    getCellFromElf(elf: Elf): GridCell{
+        for (let gridIndex = 0; gridIndex < this.grid.length; gridIndex++){
+            let gridCell = this.grid[gridIndex];
+            if (gridCell.elves.indexOf(elf) >= 0){
+                return gridCell;
+            }
+        }
+        return null;
+    }
+
     clearGrid() {
+        console.log("Clearing grid")
         this.grid = [];
         this.newGrid();
     }
@@ -89,9 +100,10 @@ export class GridManager {
 
     addElf(elf: Elf) {
         let theseCoords: Vector2d = this.getCoordsFromPosition(elf.position);
+        console.log(elf.position?.toString(), theseCoords?.toString());
         if (theseCoords){//Null if position is invalid
             let gridCell: GridCell = this.getCell(theseCoords);
-            if (gridCell != null){
+            if (gridCell != null){ 
                 gridCell.elves.push(elf);
                 console.log(`Currently ${gridCell.elves.length} elves`);
             }else{

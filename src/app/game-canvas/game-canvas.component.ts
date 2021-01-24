@@ -125,7 +125,7 @@ export class GameCanvasComponent implements AfterViewInit {
       let randomIndex = Math.ceil(Math.random()*aliveOffscreen);
       switch(true){
         case(randomIndex <= healthyOffscreen):{
-          elf = new Elf(this, true, spawnOffset, false, true);
+          elf = new Elf(this, true, spawnOffset, false, false);
           break;
         }
         case(randomIndex-healthyOffscreen <= illOffscreen):{

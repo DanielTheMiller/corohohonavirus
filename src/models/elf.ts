@@ -157,8 +157,8 @@ export class Elf {
             }
         }
         if (footprintRequired){
-            let pos = !this.isNPC ? this.position.getInverse() : this.position;
-            this.footprints.push(new Footprint(this, new Vector2d(pos.x + (this.stepOffset ? 20 : -20), pos.y - 70)));
+            let pos = this.position;
+            this.footprints.push(new Footprint(this, new Vector2d(pos.x + (this.stepOffset ? 20 : -20), pos.y + 70)));
             this.stepOffset = !this.stepOffset;
         }
     }
@@ -315,7 +315,11 @@ export class Elf {
         }
         this.gameComponent.context.scale(facingDirection, 1);
         this.gameComponent.context.fillStyle = `rgba(0, 0, 0)`;
+        if (this.isNPC) {
+            destX *= facingDirection;// += this.gameComponent.myCanvas.nativeElement.width/2;
+        }
         this.gameComponent.context.fillText(`${this.id} - ${this.position.toString()}`, destX, destY);
         this.gameComponent.context.fillText(`${destX} ${destY}`, destX, destY+20);
+        this.gameComponent.context.fillText(`${this.gameComponent.gridManager.getCellFromElf(this)?.coord.toString()}`, destX, destY+40);
     }
 }
