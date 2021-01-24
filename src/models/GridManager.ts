@@ -82,7 +82,7 @@ export class GridManager {
     
     getRelativePositionFromPosition(position: Vector2d): Vector2d {
         //Would usually inverse the gameCanvas pos, but it's already unintentially inversed
-        return position.add(this.gameCanvas.pos).add(this.canvasOffset.getInverse());
+        return position.add(this.gameCanvas.pos.getInverse()).add(this.canvasOffset.getInverse());
     }
 
     getCoordsFromPosition(position: Vector2d): Vector2d {
