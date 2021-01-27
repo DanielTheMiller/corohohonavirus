@@ -20,8 +20,8 @@ export class GridManager {
     grid: GridCell[] = [];
     cellSize: Vector2d;
     gameCanvas: GameCanvasComponent;
-    width: number = 500;
-    height: number = 500;
+    width: number;
+    height: number;
     canvasOffset: Vector2d;
 
     constructor(gameCanvas: GameCanvasComponent)
@@ -166,5 +166,39 @@ export class GridManager {
             }
         }
         return null;
+    }
+
+    getRandomSpawnLocation(): Vector2d {
+        let spawnXIndex: number;
+        let spawnYIndex: number;
+        let spawnOrigin: number =Math.floor(Math.random() * 4); 
+        switch (spawnOrigin){
+            case (0):{//Spawn top
+                spawnYIndex = -1;
+                spawnXIndex = Math.floor(Math.random() * CELLS_X);
+                break;
+            };
+            case (1):{//Spawn right
+                spawnXIndex = CELLS_X+1;
+                spawnYIndex = Math.floor(Math.random() * CELLS_X);
+                break;
+            };
+            case (2):{//Spawn bottom
+                spawnYIndex = CELLS_Y+1;
+                spawnXIndex = Math.floor(Math.random() * CELLS_X);
+                break;
+            }
+            case (3):{//Spawn left
+                spawnXIndex = -1;
+                spawnYIndex = Math.floor(Math.random() * CELLS_X);
+                break;
+            }
+        }
+        spawnXIndex -= CELLS_X/2;
+        spawnYIndex -= CELLS_Y/2;
+        let mainPos = this.gameCanvas.mainElf.position;
+        let relativePos = new Vector2d(this.cellSize.x * spawnXIndex, this.cellSize.y * spawnYIndex);
+        let newRandomLocation = mainPos.add(relativePos);
+        return newRandomLocation;
     }
 }

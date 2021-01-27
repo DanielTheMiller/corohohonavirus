@@ -97,7 +97,7 @@ export class GameCanvasComponent implements AfterViewInit {
       return;
     }
     if (thisTime- this.timeLastElfSpawned > ELF_SPAWN_INTERVAL){
-      let spawnOffset: Vector2d;
+      /*let spawnOffset: Vector2d;
       switch (Math.ceil(Math.random()*4)) {
         case (1):
           //Top
@@ -116,7 +116,8 @@ export class GameCanvasComponent implements AfterViewInit {
           break;
       }
       spawnOffset.translate(new Vector2d(-this.myCanvas.nativeElement.width/2,-this.myCanvas.nativeElement.height/2))
-      spawnOffset.translate(this.pos.getInverse());
+      spawnOffset.translate(this.pos.getInverse());*/
+      let randomSpawnPos = this.gridManager.getRandomSpawnLocation();
       let elf: Elf;
       let aliveOffscreen = this.alive-this.onScreenAlive;
       let healthyOffscreen = this.healthy - this.onScreenHealthy;
@@ -125,17 +126,17 @@ export class GameCanvasComponent implements AfterViewInit {
       let randomIndex = Math.ceil(Math.random()*aliveOffscreen);
       switch(true){
         case(randomIndex <= healthyOffscreen):{
-          elf = new Elf(this, true, spawnOffset, false, false);
+          elf = new Elf(this, true, randomSpawnPos, false, false);
           break;
         }
         /*case(randomIndex-healthyOffscreen <= illOffscreen):{
           //SPAWN ILL
-          elf = new Elf(this, true, spawnOffset, true);
+          elf = new Elf(this, true, randomSpawnPos, true);
           break;
         }*/
         case (randomIndex-healthyOffscreen-illOffscreen <= immunisedOffscreen):{
           //SPAWN IMUNISED
-          elf = new Elf(this,true,spawnOffset,false);
+          elf = new Elf(this,true,randomSpawnPos,false);
         }
       }
       this.elves.push(elf);
