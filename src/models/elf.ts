@@ -217,7 +217,7 @@ export class Elf {
         let lookDirX = this.lookDir.x;
         let sprinting = this.dirInputs.sprint;
         let facingDirection = Math.sign(lookDirX);
-        facingDirection = facingDirection == 0 ? 1 : facingDirection;
+        facingDirection = facingDirection == 0 || this.isolated ? 1 : facingDirection;
         
         for (let fIndex = 0; fIndex < this.footprints.length; fIndex++) {
             let footprint = this.footprints[fIndex];
@@ -283,7 +283,6 @@ export class Elf {
         }
 
         //console.log(srcImage, srcX, srcY, this.frameWidth, this.frameHeight, destX, destY, destHeight, destHeight)
-        
         this.gameComponent.context.setTransform(1,0,0,1,0,0);
         this.gameComponent.context.translate(Math.floor(this.gameComponent.myCanvas.nativeElement.width / 2-srcWidth/4), Math.floor(this.gameComponent.myCanvas.nativeElement.height / 2-srcHeight/4));
         this.gameComponent.context.scale(facingDirection, 1);

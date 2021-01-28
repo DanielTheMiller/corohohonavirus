@@ -26,10 +26,10 @@ export class RefillStation{
     }
 
     draw(){
-        /*if (!this.gameCanvas.itemIsInViewport(this.position, this.size)){
+        if (!this.gameCanvas.gridManager.isStationInViewport(this)){
             this.gameCanvas.removeStation(this);
             return;
-        }*/
+        }
         this.checkPickup();
         this.gameCanvas.context.beginPath();
         this.gameCanvas.context.setTransform(1,0,0,1,0,0);

@@ -43,10 +43,13 @@ export class Projectile {
                 switch(this.type){
                     case(ProjectileType.BULLET):
                         elfHit.kill();
+                        break;
                     case(ProjectileType.ICECUBE):
                         elfHit.isolate();
+                        break;
                     case(ProjectileType.SYRINGE):
                         elfHit.vacinate();
+                        break;
                 }    
                 this.parent.removeBullet(this);
             }

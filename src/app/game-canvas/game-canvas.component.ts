@@ -162,26 +162,7 @@ export class GameCanvasComponent implements AfterViewInit {
           break;
         }
       }
-      let spawnOffset: Vector2d;
-      switch (Math.ceil(Math.random()*4)) {
-        case (1):
-          //Top
-          spawnOffset = new Vector2d(Math.random()*this.myCanvas.nativeElement.width, -stationImage.height);
-          break;
-        case (2):
-          //Right
-          spawnOffset = new Vector2d(this.myCanvas.nativeElement.width+stationImage.width, Math.random()*this.myCanvas.nativeElement.height);
-          break;
-        case (3):
-          //Bottom
-          spawnOffset = new Vector2d(this.myCanvas.nativeElement.width*Math.random(), this.myCanvas.nativeElement.height+stationImage.height);
-          break;
-        case (4):
-          spawnOffset = new Vector2d(-stationImage.width, this.myCanvas.nativeElement.height * Math.random());
-          break;
-      }
-      spawnOffset.translate(new Vector2d(-this.myCanvas.nativeElement.width/2,-this.myCanvas.nativeElement.height/2))
-      spawnOffset.translate(this.pos.getInverse());
+      let spawnOffset: Vector2d = this.gridManager.getRandomSpawnLocation();
       this.refillStations.push(new RefillStation(this, projectileType, spawnOffset));
       this.timeLastAmmoStationSpawned = thisTime;
     }

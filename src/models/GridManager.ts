@@ -1,5 +1,6 @@
 import { GameCanvasComponent } from "src/app/game-canvas/game-canvas.component";
 import { Elf } from "./elf";
+import { RefillStation } from "./refillStation";
 import { Vector2d } from "./vector2d";
 
 //This class defines a grid which will be used to separate elfs on map into sections 
@@ -103,7 +104,7 @@ export class GridManager {
         let theseCoords: Vector2d = this.getCoordsFromPosition(elf.position);
         if (theseCoords){//Null if position is invalid
             let gridCell: GridCell = this.getCell(theseCoords);
-            if (gridCell != null){ 
+            if (gridCell != null){
                 gridCell.elves.push(elf);
             }else if (elf.isNPC){
                 //Invalid position. Despawning
@@ -111,6 +112,15 @@ export class GridManager {
                 elf.despawn();
             }
         }
+    }
+
+    isStationInViewport(station: RefillStation): boolean {
+        let theseCoords: Vector2d = this.getCoordsFromPosition(station.position);
+        if (theseCoords) {
+            let gridCell: GridCell = this.getCell(theseCoords);
+            return gridCell != null;
+        }
+        return false;
     }
 
     //Elfs of interest
