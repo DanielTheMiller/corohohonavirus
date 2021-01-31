@@ -1,7 +1,16 @@
-<div id="ammoDetails">
-    <a id="fireButton" (mousedown)="fireButtonDown()" (touchstart)="fireButtonDown()" (mouseup)="fireButtonUp()" (touchend)="fireButtonUp()"><p>FIRE</p></a>
+<div id="ammoDetails">    
     <h3>Ammo</h3>
-    <p class="vacinate ammoBar">Vacinate ({{vacineGun.ammo}}/50)</p>
-    <p class="isolate ammoBar">Iscolate ({{isoGun.ammo}}/50)</p>
-    <p class="exterminate ammoBar">Exterminate ({{gunGun.ammo}}/50)</p>
+    <div class="ammoContainer">
+        <div class="ammoBar vacinate" [ngStyle]="{'width': vacineGunAmmo/50*99+'%'}"></div>
+        <p class="ammoLabel">Vacinate ({{vacineGunAmmo}}/50)</p>
+    </div>
+    <div class="ammoContainer">
+        <div class="ammoBar isolate" [ngStyle]="{'width': isoGunAmmo/50*99+'%'}"></div>
+        <p class="ammoLabel">Isolate ({{isoGunAmmo}}/50)</p>
+    </div>
+    <div class="ammoContainer">
+        <div class="ammoBar exterminate" [ngStyle]="{'width': gunGunAmmo/50*99+'%'}"></div>
+        <p class="ammoLabel">Exterminate ({{gunGunAmmo}}/50)</p>
+    </div>
+    <a id="fireButton" (mousedown)="fireButtonDown()" (touchstart)="fireButtonDown()" (mouseup)="fireButtonUp()" (touchend)="fireButtonUp()"><p>FIRE</p></a>
 </div>

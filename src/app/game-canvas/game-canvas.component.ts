@@ -24,12 +24,7 @@ export class GameCanvasComponent implements AfterViewInit {
 
   constructor(ngZone: NgZone) {
     this.assetManager = new AssetManager(() => {this.spawnElf()});
-
     this.ngZone = ngZone;
-
-    this.vacinateGun = new Weapon(this, WeaponType.Vacinate);
-    this.isolateGun = new Weapon(this, WeaponType.Iscolate);
-    this.exterminateGun = new Weapon(this, WeaponType.Exterminate);
   }
   
   @ViewChild('myCanvas')
@@ -97,26 +92,6 @@ export class GameCanvasComponent implements AfterViewInit {
       return;
     }
     if (thisTime- this.timeLastElfSpawned > ELF_SPAWN_INTERVAL){
-      /*let spawnOffset: Vector2d;
-      switch (Math.ceil(Math.random()*4)) {
-        case (1):
-          //Top
-          spawnOffset = new Vector2d(Math.random()*this.myCanvas.nativeElement.width, -this.mainElf.frameHeight);
-          break;
-        case (2):
-          //Right
-          spawnOffset = new Vector2d(this.myCanvas.nativeElement.width+this.mainElf.frameWidth, Math.random()*this.myCanvas.nativeElement.height);
-          break;
-        case (3):
-          //Bottom
-          spawnOffset = new Vector2d(this.myCanvas.nativeElement.width*Math.random(), this.myCanvas.nativeElement.height+this.mainElf.frameHeight);
-          break;
-        case (4):
-          spawnOffset = new Vector2d(-this.mainElf.frameWidth, this.myCanvas.nativeElement.height * Math.random());
-          break;
-      }
-      spawnOffset.translate(new Vector2d(-this.myCanvas.nativeElement.width/2,-this.myCanvas.nativeElement.height/2))
-      spawnOffset.translate(this.pos.getInverse());*/
       let randomSpawnPos = this.gridManager.getRandomSpawnLocation();
       let elf: Elf;
       let aliveOffscreen = this.alive-this.onScreenAlive;
@@ -251,11 +226,12 @@ export class GameCanvasComponent implements AfterViewInit {
       console.warn("Unsuccessful clear");
     }
   }
-
+ 
   gameLoop() {
     this.trySpawnAssets();
     this.inputDirection.getWalkDirFromInput(this.walkDir);
     if (this.inputDirection.fire){
+      console.log(this.currentWeapon, this.vacinateGun, this.isolateGun);
       this.currentWeapon.fire();
     }
     let positionUpdated = this.pos.translate(this.walkDir);

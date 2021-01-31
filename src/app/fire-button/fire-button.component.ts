@@ -11,9 +11,9 @@ export class FireButtonComponent implements OnInit {
   constructor() { }
 
   @Output() fire = new EventEmitter<boolean>();
-  @Input() vacineGun: Weapon;
-  @Input() isoGun: Weapon;
-  @Input() gunGun: Weapon;
+  @Input() vacineGunAmmo: number;
+  @Input() isoGunAmmo: number;
+  @Input() gunGunAmmo: number;
 
   fireButtonDown() {
     console.log("Fire button down");

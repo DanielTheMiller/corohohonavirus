@@ -3,6 +3,7 @@ import { ImageRef } from "./assetManager";
 import { Footprint } from "./footprints";
 import { InputDirections } from "./inputDirection";
 import { Vector2d } from "./vector2d";
+const config = require("src/config.json");
 
 const NO_OF_SIDE_WALK_FRAMES = 17;
 const NO_OF_FRONT_WALK_FRAMES = 8;
@@ -217,7 +218,7 @@ export class Elf {
         let lookDirX = this.lookDir.x;
         let sprinting = this.dirInputs.sprint;
         let facingDirection = Math.sign(lookDirX);
-        facingDirection = facingDirection == 0 || this.isolated ? 1 : facingDirection;
+        facingDirection = facingDirection == 0 || (this.isolated || !this.alive) ? 1 : facingDirection;
         
         for (let fIndex = 0; fIndex < this.footprints.length; fIndex++) {
             let footprint = this.footprints[fIndex];
@@ -318,8 +319,10 @@ export class Elf {
         if (this.isNPC) {
             destX *= facingDirection;// += this.gameComponent.myCanvas.nativeElement.width/2;
         }
-        this.gameComponent.context.fillText(`${this.id} - ${this.position.toString()}`, destX, destY);
-        this.gameComponent.context.fillText(`${destX} ${destY}`, destX, destY+20);
-        this.gameComponent.context.fillText(`${this.gameComponent.gridManager.getCellFromElf(this)?.coord.toString()}`, destX, destY+40);
+        if (config.SHOW_ELF_DEBUG_INFO){
+            this.gameComponent.context.fillText(`${this.id} - ${this.position.toString()}`, destX, destY);
+            this.gameComponent.context.fillText(`${destX} ${destY}`, destX, destY+20);
+            this.gameComponent.context.fillText(`${this.gameComponent.gridManager.getCellFromElf(this)?.coord.toString()}`, destX, destY+40);
+        }
     }
 }
