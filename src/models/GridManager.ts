@@ -1,6 +1,7 @@
 import { GameCanvasComponent } from "src/app/game-canvas/game-canvas.component";
 import { Elf } from "./elf";
 import { RefillStation } from "./refillStation";
+import { TrackableObject, TrackableObjectType } from "./TrackableObject";
 import { Vector2d } from "./vector2d";
 
 //This class defines a grid which will be used to separate elfs on map into sections 
@@ -9,11 +10,11 @@ const CELLS_Y: number = 8
 
 export class GridCell {
     coord: Vector2d;
-    elves: Elf[];
+    objects: TrackableObject[];
 
-    constructor(coord: Vector2d, elves: Elf[] = []) {
+    constructor(coord: Vector2d, objects: TrackableObject[] = []) {
         this.coord = coord;
-        this.elves = elves;
+        this.objects = objects;
     }
 }
 
@@ -57,18 +58,40 @@ export class GridManager {
         }
     }
 
-    getElvesFromCell(coords: Vector2d): Elf[]{
+    /**
+     * @deprecated The method should not be used
+     */
+    getElvesFromCell(coords: Vector2d): TrackableObject[]{
         let gridCell: GridCell = this.getCell(coords);
         if (gridCell == null){
             return [];
         }
-        return gridCell.elves;
+        return gridCell.objects.filter(x => x.type == TrackableObjectType.Elf);
+    }
+    
+    /**
+     * @deprecated The method should not be used
+     */
+    getStationsFromCell(coords: Vector2d): TrackableObject[]{
+        let gridCell: GridCell = this.getCell(coords);
+        if (gridCell == null){
+            return [];
+        }
+        return gridCell.objects.filter(x => x.type == TrackableObjectType.Elf);
     }
 
-    getCellFromElf(elf: Elf): GridCell{
+    getObjectsFromCell(coords: Vector2d, type: TrackableObjectType): TrackableObject[]{
+        let gridCell: GridCell = this.getCell(coords);
+        if (gridCell == null){
+            return [];
+        }
+        return gridCell.objects.filter(x => x.type == type);
+    }
+
+    getCellFromObject(object: TrackableObject): GridCell{
         for (let gridIndex = 0; gridIndex < this.grid.length; gridIndex++){
             let gridCell = this.grid[gridIndex];
-            if (gridCell.elves.indexOf(elf) >= 0){
+            if (gridCell.objects.indexOf(object) >= 0){
                 return gridCell;
             }
         }
@@ -100,22 +123,22 @@ export class GridManager {
         return new Vector2d(X, Y);
     }
 
-    addElf(elf: Elf) {
-        let theseCoords: Vector2d = this.getCoordsFromPosition(elf.position);
+    addObject(object: TrackableObject) {
+        let theseCoords: Vector2d = this.getCoordsFromPosition(object.gPos);
         if (theseCoords){//Null if position is invalid
             let gridCell: GridCell = this.getCell(theseCoords);
             if (gridCell != null){
-                gridCell.elves.push(elf);
-            }else if (elf.isNPC){
+                gridCell.objects.push(object);
+            }else{
                 //Invalid position. Despawning
-                console.log("Invalid position, despawning ",elf.id);
-                elf.despawn();
+                console.log("Invalid position, despawning ",object.id);
+                this.gameCanvas.despawnObject(object);
             }
-        }
+        }      
     }
 
     isStationInViewport(station: RefillStation): boolean {
-        let theseCoords: Vector2d = this.getCoordsFromPosition(station.position);
+        let theseCoords: Vector2d = this.getCoordsFromPosition(station.gPos);
         if (theseCoords) {
             let gridCell: GridCell = this.getCell(theseCoords);
             return gridCell != null;
@@ -124,55 +147,55 @@ export class GridManager {
     }
 
     //Elfs of interest
-    searchByRadius(position: Vector2d, radius: number): Elf[] {
+    searchByRadius(position: Vector2d, radius: number, objectType: TrackableObjectType): TrackableObject[] {
         let relativePos: Vector2d = this.getRelativePositionFromPosition(position);
         let coords: Vector2d = this.getCoordsFromRelativePosition(relativePos);
         if (coords == null){
             return [];
         }
-        let elvesToReturn: Elf[] = this.getElvesFromCell(coords);
+        let elvesToReturn: TrackableObject[] = this.getObjectsFromCell(coords, objectType);
         let includeLeftCell = relativePos.x % this.cellSize.x < radius;
         let includeRightCell = -relativePos.x % this.cellSize.x > radius;
         let includeTopCell = relativePos.y % this.cellSize.y < radius;
         let includeBottomCell = -relativePos.y % this.cellSize.y > radius;
         if (includeLeftCell){
-            elvesToReturn = elvesToReturn.concat(this.getElvesFromCell(coords.add(new Vector2d(-1,0))));
+            elvesToReturn = elvesToReturn.concat(this.getObjectsFromCell(coords.add(new Vector2d(-1,0)), objectType));
         }
         if (includeRightCell){
-            elvesToReturn = elvesToReturn.concat(this.getElvesFromCell(coords.add(new Vector2d(1,0))));
+            elvesToReturn = elvesToReturn.concat(this.getObjectsFromCell(coords.add(new Vector2d(1,0)), objectType));
         }
         if (includeTopCell){
-            elvesToReturn = elvesToReturn.concat(this.getElvesFromCell(coords.add(new Vector2d(0,-1))));
+            elvesToReturn = elvesToReturn.concat(this.getObjectsFromCell(coords.add(new Vector2d(0,-1)), objectType));
         }
         if (includeBottomCell){
-            elvesToReturn = elvesToReturn.concat(this.getElvesFromCell(coords.add(new Vector2d(0,1))));
+            elvesToReturn = elvesToReturn.concat(this.getObjectsFromCell(coords.add(new Vector2d(0,1)), objectType));
         }
         if (includeTopCell && includeLeftCell){
-            elvesToReturn = elvesToReturn.concat(this.getElvesFromCell(coords.add(new Vector2d(-1,-1))));
+            elvesToReturn = elvesToReturn.concat(this.getObjectsFromCell(coords.add(new Vector2d(-1,-1)), objectType));
         }
         if (includeTopCell && includeRightCell){
-            elvesToReturn = elvesToReturn.concat(this.getElvesFromCell(coords.add(new Vector2d(1,1))));
+            elvesToReturn = elvesToReturn.concat(this.getObjectsFromCell(coords.add(new Vector2d(1,1)), objectType));
         }
         if (includeBottomCell && includeLeftCell){
-            elvesToReturn = elvesToReturn.concat(this.getElvesFromCell(coords.add(new Vector2d(-1,1))));
+            elvesToReturn = elvesToReturn.concat(this.getObjectsFromCell(coords.add(new Vector2d(-1,1)), objectType));
         }
         if (includeBottomCell && includeRightCell){
-            elvesToReturn = elvesToReturn.concat(this.getElvesFromCell(coords.add(new Vector2d(1,1))));
+            elvesToReturn = elvesToReturn.concat(this.getObjectsFromCell(coords.add(new Vector2d(1,1)), objectType));
         }
         return elvesToReturn;
     }
 
-    findFirstImpactedElf(globalPosition: Vector2d, radius: number, ignore: Elf[]): Elf{
-        let relevantElves: Elf[] = this.searchByRadius(globalPosition, radius);
+    findFirstImpactedElf(globalPosition: Vector2d, radius: number, ignore: TrackableObject[]): Elf{
+        let relevantElves: TrackableObject[] = this.searchByRadius(globalPosition, radius, TrackableObjectType.Elf);
         console.log("Found ",relevantElves.length," elves");
         for (let eIndex = 0; eIndex < relevantElves.length; eIndex++){
-            let thisElf: Elf = relevantElves[eIndex];
+            let thisElf: TrackableObject = relevantElves[eIndex];
             if (ignore.indexOf(thisElf) >= 0){//Blacklsted elf
                 continue;
             }
-            let diff = thisElf.position.add(globalPosition.getInverse()).getAbsolute();
+            let diff = thisElf.gPos.add(globalPosition.getInverse()).getAbsolute();
             if (diff.x <= radius && diff.y <= radius){
-                return thisElf;
+                return thisElf as Elf;
             }
         }
         return null;
@@ -190,7 +213,7 @@ export class GridManager {
             };
             case (1):{//Spawn right
                 spawnXIndex = CELLS_X+1;
-                spawnYIndex = Math.floor(Math.random() * CELLS_X);
+                spawnYIndex = Math.floor(Math.random() * CELLS_X); 
                 break;
             };
             case (2):{//Spawn bottom
@@ -206,7 +229,7 @@ export class GridManager {
         }
         spawnXIndex -= CELLS_X/2;
         spawnYIndex -= CELLS_Y/2;
-        let mainPos = this.gameCanvas.mainElf.position;
+        let mainPos = this.gameCanvas.mainElf.gPos;
         let relativePos = new Vector2d(this.cellSize.x * spawnXIndex, this.cellSize.y * spawnYIndex);
         let newRandomLocation = mainPos.add(relativePos);
         return newRandomLocation;

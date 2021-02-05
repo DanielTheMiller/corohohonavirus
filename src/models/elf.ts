@@ -2,8 +2,9 @@ import { GameCanvasComponent } from "src/app/game-canvas/game-canvas.component";
 import { ImageRef } from "./assetManager";
 import { Footprint } from "./footprints";
 import { InputDirections } from "./inputDirection";
+import { TrackableObject, TrackableObjectType } from "./TrackableObject";
 import { Vector2d } from "./vector2d";
-const config = require("src/config.json");
+import * as config from "../config.json";
 
 const NO_OF_SIDE_WALK_FRAMES = 17;
 const NO_OF_FRONT_WALK_FRAMES = 8;
@@ -12,8 +13,7 @@ const TIME_TO_BE_ISOLATED: number = 10000;
 const INFECTION_LIFETIME: number = 15000;
 var noOfElvesSpawned: number = 0;
 
-export class Elf {
-    id: number;
+export class Elf extends TrackableObject {
     alive: boolean = true;
     isolated: boolean = false;
     vacinated: boolean = false;
@@ -22,7 +22,6 @@ export class Elf {
     _keepStill: boolean = false;
 
     isNPC: boolean = false;
-    position: Vector2d;
 
     currentImage: HTMLImageElement;
 
@@ -58,10 +57,10 @@ export class Elf {
     lastShotMade: number = 0;
 
     constructor(gameComponent: GameCanvasComponent, npc: boolean = false, position: Vector2d = new Vector2d(), isInfected=false, keepStill=false){
+        super(position, TrackableObjectType.Elf);
         this.id = noOfElvesSpawned++;
         let assetManager = gameComponent.assetManager;
         this.gameComponent = gameComponent;
-        this.position = position;
         this.isNPC = npc;
         this.icedImage = assetManager.getImage(ImageRef.NPC_ICED);
         this.ill = isInfected;
@@ -77,7 +76,7 @@ export class Elf {
             this.frontWalkImage = assetManager.getImage(ImageRef.MAIN_FRONT_WALK_CYCLE);
             this.backWalkimage = assetManager.getImage(ImageRef.MAIN_BACK_WALK_CYCLE);
             this.walkDir = this.gameComponent.walkDir;
-            this.position = this.gameComponent.pos;
+            this.gPos = this.gameComponent.pos;
             this.dirInputs = this.gameComponent.inputDirection;
         } else {
             this.idleFrontImage = assetManager.getImage(ImageRef.NPC_IDLE_FRONT);
@@ -93,7 +92,7 @@ export class Elf {
     }
 
     getY(): number{
-        return this.isNPC ? this.position.y : -this.position.y;
+        return this.isNPC ? this.gPos.y : -this.gPos.y;
     }
 
     move(){
@@ -121,8 +120,8 @@ export class Elf {
                     this.lastChangeOfDirection = thisTime;
                 }
                 this.dirInputs.getWalkDirFromInput(this.walkDir, true);
-                this.position.translate(this.walkDir);
-                this.gameComponent.gridManager.addElf(this);
+                this.gPos.translate(this.walkDir);
+                this.gameComponent.gridManager.addObject(this);
             }else if (this.isolate &&  thisTime - this.timeIsolated > TIME_TO_BE_ISOLATED){
                 this.isolated = false;
             }
@@ -135,7 +134,7 @@ export class Elf {
                     this.ill = false;
                 }else if(!this.isolated){
                     //See if anyone is in contact range
-                    let elf = this.gameComponent.gridManager.findFirstImpactedElf(this.position, 50, [this]);
+                    let elf = this.gameComponent.gridManager.findFirstImpactedElf(this.gPos, 50, [this]);
                     //Invoke contacted method
                     elf?.contactMade();
 
@@ -155,7 +154,7 @@ export class Elf {
             }
         }
         if (footprintRequired){
-            let pos = this.position;
+            let pos = this.gPos;
             this.footprints.push(new Footprint(this, new Vector2d(pos.x + (this.stepOffset ? 20 : -20), pos.y + 70)));
             this.stepOffset = !this.stepOffset;
         }
@@ -279,8 +278,8 @@ export class Elf {
         }
 
         if (this.isNPC) {
-            destX = (this.position.x-this.gameComponent.pos.x)*facingDirection;
-            destY = this.position.y-this.gameComponent.pos.y;
+            destX = (this.gPos.x-this.gameComponent.pos.x)*facingDirection;
+            destY = this.gPos.y-this.gameComponent.pos.y;
         }
 
         //console.log(srcImage, srcX, srcY, this.frameWidth, this.frameHeight, destX, destY, destHeight, destHeight)
@@ -320,9 +319,9 @@ export class Elf {
             destX *= facingDirection;// += this.gameComponent.myCanvas.nativeElement.width/2;
         }
         if (config.SHOW_ELF_DEBUG_INFO){
-            this.gameComponent.context.fillText(`${this.id} - ${this.position.toString()}`, destX, destY);
+            this.gameComponent.context.fillText(`${this.id} - ${this.gPos.toString()}`, destX, destY);
             this.gameComponent.context.fillText(`${destX} ${destY}`, destX, destY+20);
-            this.gameComponent.context.fillText(`${this.gameComponent.gridManager.getCellFromElf(this)?.coord.toString()}`, destX, destY+40);
+            this.gameComponent.context.fillText(`${this.gameComponent.gridManager.getCellFromObject(this)?.coord.toString()}`, destX, destY+40);
         }
     }
 }

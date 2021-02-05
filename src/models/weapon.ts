@@ -2,7 +2,7 @@ import { GameCanvasComponent } from "src/app/game-canvas/game-canvas.component";
 import { Projectile, ProjectileType } from "./projectile";
 import { Vector2d } from "./vector2d";
 
-const MAX_AMMO: number = 50;
+export const MAX_AMMO: number = 50;
 const TIME_BETWEEN_SHOTS: number = 200;
 
 export class Weapon {
@@ -12,6 +12,7 @@ export class Weapon {
     weaponType: WeaponType;
     projectileType: ProjectileType;
     firedBullets: Projectile[] = [];
+    maxAmmo: number = MAX_AMMO;
 
     constructor(gameCanvas: GameCanvasComponent, type: WeaponType){
         this.gameCanvas = gameCanvas;

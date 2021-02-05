@@ -9,6 +9,7 @@ import { Weapon, WeaponType } from 'src/models/weapon';
 import { RefillStation } from 'src/models/refillStation';
 import { ProjectileType } from 'src/models/projectile';
 import { GridManager } from 'src/models/GridManager';
+import { TrackableObject, TrackableObjectType } from 'src/models/TrackableObject';
 
 const ELF_SPAWN_INTERVAL: number = 2500;
 const REFILL_SPAWN_INTERVAL: number = 15000;
@@ -143,11 +144,22 @@ export class GameCanvasComponent implements AfterViewInit {
     }
   }
 
-  removeElf(elf: Elf){
+  despawnObject(object: TrackableObject){
+    switch (object.type){
+      case(TrackableObjectType.Elf):
+        this.removeElf(object);
+        break;
+      case(TrackableObjectType.RefillStation):
+        this.removeStation(object);
+        break;
+    }
+  }
+
+  removeElf(elf: TrackableObject){
     this.elves = this.elves.filter(x => x != elf);
   }
 
-  removeStation(refillStation: RefillStation){
+  removeStation(refillStation: TrackableObject){
     this.refillStations = this.refillStations.filter(x => x != refillStation);
   }
 
