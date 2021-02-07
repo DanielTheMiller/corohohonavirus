@@ -92,7 +92,7 @@ export class Elf extends TrackableObject {
     }
 
     getY(): number{
-        return this.isNPC ? this.gPos.y : -this.gPos.y;
+        return this.gPos.y;
     }
 
     move(){
