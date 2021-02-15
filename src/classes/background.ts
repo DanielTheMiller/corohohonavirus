@@ -20,13 +20,16 @@ export class Background {
             console.warn("Background pattern is null!");
             return;
         }
+        if (this.gameCanvas.mainElf == null){
+            return;
+        }
 //        console.log("Re-rendering backdrop");
         //this.context.translate(-xPos, yPos);
-        this.gameCanvas.context.setTransform(1,0,0,1,(-this.gameCanvas.pos.x),(-this.gameCanvas.pos.y));
+        this.gameCanvas.context.setTransform(1,0,0,1,(-this.gameCanvas.mainElf.gPos.x),(-this.gameCanvas.mainElf.gPos.y));
         this.gameCanvas.context.beginPath();
         this.gameCanvas.context.rect(
-            this.gameCanvas.pos.x, 
-            this.gameCanvas.pos.y, 
+            this.gameCanvas.mainElf.gPos.x, 
+            this.gameCanvas.mainElf.gPos.y, 
             this.gameCanvas.myCanvas.nativeElement.width, 
             this.gameCanvas.myCanvas.nativeElement.height); // context.fillRect(x, y, width, height);
         this.gameCanvas.context.fill();
@@ -35,9 +38,9 @@ export class Background {
     drawElfRect(x: number, y: number, xs: number, ys: number){        
         this.gameCanvas.context.setTransform(1,0,0,1,0,0);
         this.gameCanvas.context.translate(Math.floor(this.gameCanvas.myCanvas.nativeElement.width / 2),Math.floor(this.gameCanvas.myCanvas.nativeElement.height / 2));
-        this.gameCanvas.context.clearRect(x-this.gameCanvas.pos.x, y-this.gameCanvas.pos.y, xs, ys);
+        this.gameCanvas.context.clearRect(x-this.gameCanvas.mainElf.gPos.x, y-this.gameCanvas.mainElf.gPos.y, xs, ys);
         this.gameCanvas.context.beginPath();
-        this.gameCanvas.context.rect(x-this.gameCanvas.pos.x, y-this.gameCanvas.pos.y, xs, ys); // context.fillRect(x, y, width, height);
+        this.gameCanvas.context.rect(x-this.gameCanvas.mainElf.gPos.x, y-this.gameCanvas.mainElf.gPos.y, xs, ys); // context.fillRect(x, y, width, height);
         this.gameCanvas.context.fill();
     }
 }

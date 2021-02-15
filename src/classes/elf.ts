@@ -78,8 +78,6 @@ export class Elf extends TrackableObject {
             this.sideWalkImage = assetManager.getImage(ImageRef.MAIN_SIDE_WALK_CYCLE);
             this.frontWalkImage = assetManager.getImage(ImageRef.MAIN_FRONT_WALK_CYCLE);
             this.backWalkimage = assetManager.getImage(ImageRef.MAIN_BACK_WALK_CYCLE);
-            this.walkDir = this.gameComponent.walkDir;
-            this.gPos = this.gameComponent.pos;
             this.dirInputs = this.gameComponent.inputDirection;
         } else {
             this.idleFrontImage = assetManager.getImage(ImageRef.NPC_IDLE_FRONT);
@@ -143,6 +141,8 @@ export class Elf extends TrackableObject {
 
                 }
             }
+        } else {
+            this.gPos.translate(this.walkDir);
         }
         
         let footprintRequired = false;
@@ -282,8 +282,8 @@ export class Elf extends TrackableObject {
         }
 
         if (this.isNPC) {
-            destX = (this.gPos.x-this.gameComponent.pos.x)*facingDirection;
-            destY = this.gPos.y-this.gameComponent.pos.y;
+            destX = (this.gPos.x-this.gameComponent.mainElf.gPos.x)*facingDirection;
+            destY = this.gPos.y-this.gameComponent.mainElf.gPos.y;
         }
 
         //console.log(srcImage, srcX, srcY, this.frameWidth, this.frameHeight, destX, destY, destHeight, destHeight)

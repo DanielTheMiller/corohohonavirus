@@ -30,8 +30,8 @@ export class Footprint {
             this.gameCanvas.context.translate(Math.floor(this.gameCanvas.myCanvas.nativeElement.width / 2), Math.floor(this.gameCanvas.myCanvas.nativeElement.height / 2));
             this.gameCanvas.context.fillStyle = `rgba(55, 55, 55, ${opacity})`;
             this.gameCanvas.context.arc(
-                (this.position.x-this.gameCanvas.pos.x)-this.size.x/2,
-                (this.position.y-this.gameCanvas.pos.y)-this.size.y/2,
+                (this.position.x-this.gameCanvas.mainElf.gPos.x)-this.size.x/2,
+                (this.position.y-this.gameCanvas.mainElf.gPos.y)-this.size.y/2,
                 this.size.x,
                 0,
                 2 * Math.PI);

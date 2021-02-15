@@ -40,13 +40,12 @@ export class GameCanvasComponent implements AfterViewInit {
   mainElf: Elf;
   refillStations: RefillStation[] = [];
   deltaTime: number = 0.1;
+  latestFrameTime: number;
 
   assetManager: AssetManager;
   gridManager: GridManager;
   gameStateManager: GameStateManager;
   
-  pos:Vector2d = new Vector2d();
-  walkDir:Vector2d = new Vector2d();
   inputDirection:InputDirections = new InputDirections();
   key:string = "";
   ngZone: NgZone;
@@ -140,6 +139,7 @@ export class GameCanvasComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     console.log("After View Init");
+    this.latestFrameTime = new Date().getTime();
     if (this.myCanvas != undefined && this.myCanvas != null){
       this.setupTouchInputs();
       this.myCanvas.nativeElement.width = window.innerWidth;
@@ -214,14 +214,24 @@ export class GameCanvasComponent implements AfterViewInit {
     }
   }
  
+  updateDeltaTime() {
+    let currentFrameTime = new Date().getTime();
+    this.deltaTime = currentFrameTime - this.latestFrameTime;
+    this.latestFrameTime = currentFrameTime;
+  }
+
   gameLoop() {
+    if (this.mainElf == null) {
+      requestAnimationFrame(this.gameLoop.bind(this));
+      return;
+    }
+    this.updateDeltaTime();
     this.trySpawnAssets();
-    this.inputDirection.getWalkDirFromInput(this.walkDir);
+    this.inputDirection.getWalkDirFromInput(this.mainElf?.walkDir);
     if (this.inputDirection.fire){
-      console.log(this.currentWeapon, this.vacinateGun, this.isolateGun);
       this.currentWeapon.fire();
     }
-    let positionUpdated = this.pos.translate(this.walkDir);
+    this.mainElf.move();
     //if (positionUpdated){
       this.clearCanvas();
       this.gridManager?.clearGrid();
@@ -230,7 +240,9 @@ export class GameCanvasComponent implements AfterViewInit {
     for (let elfIndex = 0; elfIndex < this.elves.length; elfIndex++)
     {
       let elf = this.elves[elfIndex];
-      elf?.move();//Has crashed before without nullcheck
+      if (this.mainElf != elf){
+        elf?.move();//Has crashed before without nullcheck
+      }
     }
     // For performance reasons, we will first map to a temp array, sort and map the temp array to the objects array.
     let elvesMap = this.elves.map(function (el, index) {

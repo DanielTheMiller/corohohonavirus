@@ -15,6 +15,9 @@ export class InputDirections {
     public fire: boolean = false;
 
     getWalkDirFromInput(vector: Vector2d, isNPC: boolean = false): void{
+        if (vector == null){
+            return;
+        }
         let accelerationSpeed = this.sprint ? 2 : 1;
         let maxSpeed = this.sprint ? MAX_SPRINT_SPEED : MAX_SPEED;
         maxSpeed = isNPC ? maxSpeed - 2 : maxSpeed; 

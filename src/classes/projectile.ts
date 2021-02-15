@@ -20,7 +20,7 @@ export class Projectile {
         this.parent = parent;
         this.createdTime = new Date().getTime();
         this.type = type;
-        this.position = parent.gameCanvas.pos.clone();
+        this.position = parent.gameCanvas.mainElf.gPos.clone();
         this.position.translate(new Vector2d(0,15));
         this.direction = parent.gameCanvas.mainElf.lookDir.clone().multiplyThis(15);
         this.imageRotationDeg = this.direction.getImageRotation();
@@ -70,8 +70,8 @@ export class Projectile {
         this.parent.gameCanvas.context.rotate(this.imageRotationDeg*Math.PI/180);
         this.parent.gameCanvas.context.drawImage(
             this.image,
-            this.position.x-this.parent.gameCanvas.pos.x-this.size.x/2,
-            this.position.y-this.parent.gameCanvas.pos.y-this.size.y/2,
+            this.position.x-this.parent.gameCanvas.mainElf.gPos.x-this.size.x/2,
+            this.position.y-this.parent.gameCanvas.mainElf.gPos.y-this.size.y/2,
             this.size.x,
             this.size.y);
         this.parent.gameCanvas.context.fill();

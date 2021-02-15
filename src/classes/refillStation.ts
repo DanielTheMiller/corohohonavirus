@@ -40,8 +40,8 @@ export class RefillStation extends TrackableObject{
         this.gameCanvas.context.translate(Math.floor(this.gameCanvas.myCanvas.nativeElement.width / 2), Math.floor(this.gameCanvas.myCanvas.nativeElement.height / 2));
         this.gameCanvas.context.drawImage(
             this.pickedUp ? this.stationEmptyImage : this.stationImage,
-            -this.gameCanvas.pos.x-this.size.x/2+this.gPos.x,
-            -this.gameCanvas.pos.y-this.size.y/2+this.gPos.y);
+            -this.gameCanvas.mainElf.gPos.x-this.size.x/2+this.gPos.x,
+            -this.gameCanvas.mainElf.gPos.y-this.size.y/2+this.gPos.y);
         this.gameCanvas.context.fill();        
     }
 
