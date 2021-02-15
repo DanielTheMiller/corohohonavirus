@@ -1,5 +1,4 @@
 import { Component, OnInit, Output, Input,EventEmitter } from '@angular/core';
-import { Weapon } from 'src/models/weapon';
 
 @Component({
   selector: 'app-fire-button',

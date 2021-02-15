@@ -53,6 +53,35 @@ export class Vector2d {
         return new Vector2d(Math.abs(this.x), Math.abs(this.y));
     }
 
+    public getSign(): Vector2d{
+        return new Vector2d(Math.sign(this.x), Math.sign(this.y));
+    }
+
+    public getImageRotation(): number{//Returns in Degrees
+        let signDir = this.getSign();
+        console.log("signDir: ",signDir);
+        if (signDir.x == 0 && signDir.y == -1) {
+            return 0;
+        } else if (signDir.x == 1 && signDir.y == -1) {
+            return 45;
+        } else if (signDir.x == 1 && signDir.y == 0) {
+            return 90;
+        } else if (signDir.x == 1 && signDir.y == 1) {
+            return 135;
+        } else if (signDir.x == 0 && signDir.y == 1) {
+            return 180;
+        } else if (signDir.x == -1 && signDir.y == 1) {
+            return 225;
+        } else if (signDir.x == -1 && signDir.y == 0) {
+            return 270;
+        } else if (signDir.x == -1 && signDir.y == -1) {
+            return 315;
+        } else {
+            //Illegal position
+            return 0;
+        }
+    }
+
     public clone(): Vector2d{
         return new Vector2d(this.x, this.y);
     }

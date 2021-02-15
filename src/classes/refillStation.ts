@@ -1,5 +1,5 @@
 import { GameCanvasComponent } from "src/app/game-canvas/game-canvas.component";
-import { ImageRef } from "./assetManager";
+import { ImageRef } from "src/models/ImageRef";
 import { ProjectileType } from "./projectile";
 import { TrackableObject, TrackableObjectType } from "./TrackableObject";
 import { Vector2d } from "./vector2d";

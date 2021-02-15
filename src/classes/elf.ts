@@ -1,23 +1,24 @@
 import { GameCanvasComponent } from "src/app/game-canvas/game-canvas.component";
-import { ImageRef } from "./assetManager";
 import { Footprint } from "./footprints";
 import { InputDirections } from "./inputDirection";
 import { TrackableObject, TrackableObjectType } from "./TrackableObject";
 import { Vector2d } from "./vector2d";
 import * as config from "../config.json";
+import { ElfHealthState } from "src/models/ElfHealthState";
+import { ImageRef } from "src/models/ImageRef";
 
 const NO_OF_SIDE_WALK_FRAMES = 17;
 const NO_OF_FRONT_WALK_FRAMES = 8;
+const WALKSPEED = 50;//IN PIXELS PER SECOND
+const ANIMATIONSPEED = 12;//IN FRAMES PER SECOND
 const TIME_BETWEEN_STEPS: number = 200;
 const TIME_TO_BE_ISOLATED: number = 10000;
-const INFECTION_LIFETIME: number = 15000;
+const INFECTION_LIFETIME: number = 30000;
 var noOfElvesSpawned: number = 0;
 
 export class Elf extends TrackableObject {
-    alive: boolean = true;
+    healthState: ElfHealthState;
     isolated: boolean = false;
-    vacinated: boolean = false;
-    ill: boolean = false;
     contactedIllElf: boolean = false;
     _keepStill: boolean = false;
 
@@ -44,6 +45,7 @@ export class Elf extends TrackableObject {
     timeContacted: number;
     timeIsolated: number;
     timeInfected: number;
+    timeSpawned: number;
     lastChangeOfDirection: number = new Date().getTime();//Property for NPC roaming
     footprints: Footprint[] = [];
     gameComponent: GameCanvasComponent;
@@ -56,17 +58,18 @@ export class Elf extends TrackableObject {
 
     lastShotMade: number = 0;
 
-    constructor(gameComponent: GameCanvasComponent, npc: boolean = false, position: Vector2d = new Vector2d(), isInfected=false, keepStill=false){
+    constructor(gameComponent: GameCanvasComponent, npc: boolean = false, position: Vector2d = new Vector2d(), healthState=ElfHealthState.NOT_VACINATED, keepStill=false){
         super(position, TrackableObjectType.Elf);
         this.id = noOfElvesSpawned++;
         let assetManager = gameComponent.assetManager;
         this.gameComponent = gameComponent;
         this.isNPC = npc;
         this.icedImage = assetManager.getImage(ImageRef.NPC_ICED);
-        this.ill = isInfected;
+        this.healthState = healthState;
         this._keepStill = keepStill;
-        if (isInfected){
-            this.timeInfected = new Date().getTime();            
+        this.timeSpawned = new Date().getTime();
+        if (healthState == ElfHealthState.INFECTED){
+            this.timeInfected = this.timeSpawned; 
         }
         if (!npc){
             this.idleFrontImage = assetManager.getImage(ImageRef.MAIN_IDLE_FRONT);
@@ -98,7 +101,7 @@ export class Elf extends TrackableObject {
     move(){
         let thisTime = new Date().getTime();
         if (this.isNPC) {
-            if (this.alive && !this.isolated && !this._keepStill){
+            if (this.healthState != ElfHealthState.DEAD && !this.isolated && !this._keepStill){
                 if (thisTime - this.lastChangeOfDirection > 500){
                     switch(Math.ceil(Math.random()*5)){//Change direction
                         case 1:
@@ -125,16 +128,16 @@ export class Elf extends TrackableObject {
             }else if (this.isolate &&  thisTime - this.timeIsolated > TIME_TO_BE_ISOLATED){
                 this.isolated = false;
             }
-            if (this.ill){
+            if (this.healthState == ElfHealthState.INFECTED){
                 if (thisTime - this.timeInfected > INFECTION_LIFETIME){
-                    if (Math.ceil(Math.random()*100)<=5) {
+                    if (Math.ceil(Math.random()*100)<=33) {
                         //5% change of death
                         this.kill();
                     }
-                    this.ill = false;
+                    this.recover();
                 }else if(!this.isolated){
                     //See if anyone is in contact range
-                    let elf = this.gameComponent.gridManager.findFirstImpactedElf(this.gPos, 50, [this]);
+                    let elf = this.gameComponent.gridManager.findFirstImpactedElf(this.gPos, 150, [this]);
                     //Invoke contacted method
                     elf?.contactMade();
 
@@ -168,32 +171,34 @@ export class Elf extends TrackableObject {
         }
     }*/
 
+    isElfVulnerable() : boolean { 
+        return (this.healthState == ElfHealthState.NOT_VACINATED)
+    }
+
     contactMade() {
-        if (this.contactedIllElf == false && !this.vacinated && this.ill == false){
+        if (this.contactedIllElf == false && this.isElfVulnerable()){
             this.contactedIllElf = true;
             this.timeContacted = new Date().getTime();
         }
     }
 
     infect() {
-        this.ill = true;
+        this.healthState = ElfHealthState.INFECTED;
         this.timeInfected = new Date().getTime();
-        this.gameComponent.infected++;
+        this.gameComponent.gameStateManager.newElfInfection();
     }
 
     recover() {
-        this.ill = false;
-        this.gameComponent.infected--;
-        this.vacinate();
+        this.healthState = ElfHealthState.RECOVERED;
+        this.gameComponent.gameStateManager.newElfRecovery();
     }
 
     kill() {
-        if (this.ill){
-            this.ill = false;
-            this.gameComponent.infected--;
+        if (this.healthState == ElfHealthState.INFECTED){
+            this.healthState = ElfHealthState.DEAD;
+            this.gameComponent.gameStateManager.illElfDied();
         }
         this.walkDir.set(0,0);
-        this.alive = false;
     }
 
     isolate() {
@@ -203,22 +208,21 @@ export class Elf extends TrackableObject {
     }
 
     vacinate() {
-        if (this.vacinated == false){        
-            this.vacinated = true;
-            this.gameComponent.vacinated++;
+        if (this.healthState == ElfHealthState.NOT_VACINATED){        
+            this.healthState = ElfHealthState.VACINATED;
+            this.gameComponent.gameStateManager.newElfVacination();
         }
     }
 
     despawn() {
-        this.gameComponent.removeElf(this);
+        this.gameComponent.removeElf(this);//This method updates the gamestate
     }
 
     render(){
         let lookDirX = this.lookDir.x;
         let sprinting = this.dirInputs.sprint;
         let facingDirection = Math.sign(lookDirX);
-        facingDirection = facingDirection == 0 || (this.isolated || !this.alive) ? 1 : facingDirection;
-        
+        facingDirection = facingDirection == 0 || (this.isolated || this.healthState == ElfHealthState.DEAD) ? 1 : facingDirection;        
         for (let fIndex = 0; fIndex < this.footprints.length; fIndex++) {
             let footprint = this.footprints[fIndex];
             footprint.draw()
@@ -241,7 +245,7 @@ export class Elf extends TrackableObject {
                 srcHeight = this.icedImage.height;
                 destWidth = this.icedImage.width/2;
                 destHeight = this.icedImage.height/2;
-            } else if (!this.alive) {
+            } else if (this.healthState == ElfHealthState.DEAD) {
                 this.currentImage = this.deadImage;
                 srcWidth = this.deadImage.width;
                 srcHeight = this.deadImage.height; 
@@ -298,7 +302,7 @@ export class Elf extends TrackableObject {
             destHeight);
 
         //Draw token if required
-        if (this.ill) {
+        if (this.healthState == ElfHealthState.INFECTED) {
             this.gameComponent.context.drawImage(
                 this.illTokenImage,
                 destX + this.currentImage.width/4*facingDirection - this.illTokenImage.width/2,
@@ -306,7 +310,7 @@ export class Elf extends TrackableObject {
             )
         }
 
-        if (this.vacinated) {
+        if (this.healthState == ElfHealthState.VACINATED || this.healthState == ElfHealthState.RECOVERED) {
             this.gameComponent.context.drawImage(
                 this.vacinatedTokenImage,
                 destX + this.currentImage.width/4*facingDirection - this.vacinatedTokenImage.width/2,
@@ -322,6 +326,23 @@ export class Elf extends TrackableObject {
             this.gameComponent.context.fillText(`${this.id} - ${this.gPos.toString()}`, destX, destY);
             this.gameComponent.context.fillText(`${destX} ${destY}`, destX, destY+20);
             this.gameComponent.context.fillText(`${this.gameComponent.gridManager.getCellFromObject(this)?.coord.toString()}`, destX, destY+40);
+            this.gameComponent.context.fillText(this.getStringFromHealthState(this.healthState), destX, destY+60);
+            this.gameComponent.context.fillText(`Contact made: ${this.contactedIllElf}`, destX, destY+80)
+        }
+    }
+
+    getStringFromHealthState(state: ElfHealthState): string{
+        switch(state){
+            case ElfHealthState.NOT_VACINATED:
+                return "Healthy";
+            case ElfHealthState.INFECTED:
+                return `Infected - ${this.timeInfected}`;
+            case ElfHealthState.DEAD:
+                return "Dead";
+            case ElfHealthState.RECOVERED:
+                return "Recovered";
+            case ElfHealthState.VACINATED:
+                return "Vacinated";
         }
     }
 }

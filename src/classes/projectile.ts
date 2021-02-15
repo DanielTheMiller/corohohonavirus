@@ -1,4 +1,4 @@
-import { ImageRef } from "./assetManager";
+import { ImageRef } from "src/models/ImageRef";
 import { Elf } from "./elf";
 import { Vector2d } from "./vector2d";
 import { Weapon } from "./weapon";
@@ -14,13 +14,16 @@ export class Projectile {
     parent: Weapon;
     image: HTMLImageElement;
     size: Vector2d = size;
+    imageRotationDeg: number;
 
     constructor(parent: Weapon, type: ProjectileType){
         this.parent = parent;
         this.createdTime = new Date().getTime();
         this.type = type;
         this.position = parent.gameCanvas.pos.clone();
+        this.position.translate(new Vector2d(0,15));
         this.direction = parent.gameCanvas.mainElf.lookDir.clone().multiplyThis(15);
+        this.imageRotationDeg = this.direction.getImageRotation();
         switch(type){
             case(ProjectileType.SYRINGE):
                 this.image = this.parent.gameCanvas.assetManager.getImage(ImageRef.SYRINGE);
@@ -63,6 +66,8 @@ export class Projectile {
         this.parent.gameCanvas.context.beginPath();
         this.parent.gameCanvas.context.setTransform(1,0,0,1,0,0);
         this.parent.gameCanvas.context.translate(Math.floor(this.parent.gameCanvas.myCanvas.nativeElement.width / 2), Math.floor(this.parent.gameCanvas.myCanvas.nativeElement.height / 2));
+        console.log(this.imageRotationDeg);
+        this.parent.gameCanvas.context.rotate(this.imageRotationDeg*Math.PI/180);
         this.parent.gameCanvas.context.drawImage(
             this.image,
             this.position.x-this.parent.gameCanvas.pos.x-this.size.x/2,

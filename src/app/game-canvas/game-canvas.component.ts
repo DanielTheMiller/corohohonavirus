@@ -1,19 +1,22 @@
 import { ViewChild, ElementRef, Component, AfterViewInit, HostListener, NgZone } from '@angular/core';
-import { Background } from 'src/models/background';
-import { Elf } from 'src/models/elf';
-import { InputDirections } from 'src/models/inputDirection';
-import { Vector2d } from 'src/models/vector2d';
+import { Background } from 'src/classes/background';
+import { Elf } from 'src/classes/elf';
+import { InputDirections } from 'src/classes/inputDirection';
+import { Vector2d } from 'src/classes/vector2d';
 import * as nipplejs from 'nipplejs';
-import { AssetManager, ImageRef } from 'src/models/assetManager';
-import { Weapon, WeaponType } from 'src/models/weapon';
-import { RefillStation } from 'src/models/refillStation';
-import { ProjectileType } from 'src/models/projectile';
-import { GridManager } from 'src/models/GridManager';
-import { TrackableObject, TrackableObjectType } from 'src/models/TrackableObject';
+import { AssetManager } from 'src/classes/assetManager';
+import { Weapon, WeaponType } from 'src/classes/weapon';
+import { RefillStation } from 'src/classes/refillStation';
+import { ProjectileType } from 'src/classes/projectile';
+import { GridManager } from 'src/classes/GridManager';
+import { TrackableObject, TrackableObjectType } from 'src/classes/TrackableObject';
+import { GameStateManager } from 'src/services/GameStateManager';
+import { ElfHealthState } from 'src/models/ElfHealthState';
+import { ImageRef } from 'src/models/ImageRef';
 
 const ELF_SPAWN_INTERVAL: number = 2500;
 const REFILL_SPAWN_INTERVAL: number = 15000;
-const SPREADING_INTERVAL: number = 1000
+const SPREADING_INTERVAL: number = 1000;
 
 @Component({
   selector: 'app-game-canvas',
@@ -23,9 +26,10 @@ const SPREADING_INTERVAL: number = 1000
 
 export class GameCanvasComponent implements AfterViewInit {
 
-  constructor(ngZone: NgZone) {
+  constructor(ngZone: NgZone, gameStateManager: GameStateManager) {
     this.assetManager = new AssetManager(() => {this.spawnElf()});
     this.ngZone = ngZone;
+    this.gameStateManager = gameStateManager;
   }
   
   @ViewChild('myCanvas')
@@ -35,9 +39,11 @@ export class GameCanvasComponent implements AfterViewInit {
   elves: Elf[] = [];
   mainElf: Elf;
   refillStations: RefillStation[] = [];
+  deltaTime: number = 0.1;
 
   assetManager: AssetManager;
   gridManager: GridManager;
+  gameStateManager: GameStateManager;
   
   pos:Vector2d = new Vector2d();
   walkDir:Vector2d = new Vector2d();
@@ -54,19 +60,6 @@ export class GameCanvasComponent implements AfterViewInit {
   currentWeapon: Weapon = this.vacinateGun;
 
   //Game Logic
-  alive: number = 1000;
-  dead: number = 0;
-  healthy: number = 800;
-  infected: number = 200;
-  vacinated: number = 0;
-  recovered: number = 0;
-  onScreenAlive = 0;
-  onScreenHealthy = 0;
-  onScreenInfected = 0;
-  onScreenVacinated = 0;
-  onScreenRecovered = 0;
-  onScreenDead = 0;
-
   timeLastElfSpawned: number = 0;
   timeLastAmmoStationSpawned: number = 0;
   timeDiseaseLastSpread: number = 0;
@@ -94,27 +87,8 @@ export class GameCanvasComponent implements AfterViewInit {
     }
     if (thisTime- this.timeLastElfSpawned > ELF_SPAWN_INTERVAL){
       let randomSpawnPos = this.gridManager.getRandomSpawnLocation();
-      let elf: Elf;
-      let aliveOffscreen = this.alive-this.onScreenAlive;
-      let healthyOffscreen = this.healthy - this.onScreenHealthy;
-      let illOffscreen = this.infected - this.onScreenInfected;
-      let immunisedOffscreen = (this.vacinated - this.onScreenVacinated) + (this.recovered - this.onScreenRecovered);
-      let randomIndex = Math.ceil(Math.random()*aliveOffscreen);
-      switch(true){
-        case(randomIndex <= healthyOffscreen):{
-          elf = new Elf(this, true, randomSpawnPos, false, false);
-          break;
-        }
-        /*case(randomIndex-healthyOffscreen <= illOffscreen):{
-          //SPAWN ILL
-          elf = new Elf(this, true, randomSpawnPos, true);
-          break;
-        }*/
-        case (randomIndex-healthyOffscreen-illOffscreen <= immunisedOffscreen):{
-          //SPAWN IMUNISED
-          elf = new Elf(this,true,randomSpawnPos,false);
-        }
-      }
+      let elfHealthState: ElfHealthState = this.gameStateManager.getNextElfHealthStateToSpawn();
+      let elf: Elf = new Elf(this, true, randomSpawnPos, elfHealthState, false);
       this.elves.push(elf);
       this.timeLastElfSpawned = thisTime;
     }
@@ -147,7 +121,7 @@ export class GameCanvasComponent implements AfterViewInit {
   despawnObject(object: TrackableObject){
     switch (object.type){
       case(TrackableObjectType.Elf):
-        this.removeElf(object);
+        this.removeElf(object as Elf);
         break;
       case(TrackableObjectType.RefillStation):
         this.removeStation(object);
@@ -155,7 +129,8 @@ export class GameCanvasComponent implements AfterViewInit {
     }
   }
 
-  removeElf(elf: TrackableObject){
+  removeElf(elf: Elf){
+    this.gameStateManager.elfRemovedFromScreen(elf);
     this.elves = this.elves.filter(x => x != elf);
   }
 
@@ -298,13 +273,14 @@ export class GameCanvasComponent implements AfterViewInit {
       for (let elfIndex = 0; elfIndex < this.elves.length; elfIndex++)
       {
         let elf = this.elves[elfIndex];
-        if (elf.alive && elf.contactedIllElf){
+        if (elf.healthState == ElfHealthState.NOT_VACINATED && elf.contactedIllElf){
+          console.log("Elf contracting virus")
           //Time to chance it
-          if (Math.ceil(Math.random()*100) <= 75){
+          if (Math.ceil(Math.random()*100) <= 80){
             //They've caught the bug
             elf.infect();
           }else{
-            elf.recover();
+            elf.contactedIllElf = false;
           }
         }
       }
