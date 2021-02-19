@@ -10,7 +10,8 @@ import { ImageRef } from "src/models/ImageRef";
 const NO_OF_SIDE_WALK_FRAMES = 17;
 const NO_OF_FRONT_WALK_FRAMES = 8;
 const WALKSPEED = 50;//IN PIXELS PER SECOND
-const ANIMATIONSPEED = 12;//IN FRAMES PER SECOND
+const WALK_ANIMATION_SPEED = 24;//IN FRAMES PER SECOND
+const RUN_ANIMATION_SPEED = 48;//IN FRAMES PER SECOND
 const TIME_BETWEEN_STEPS: number = 200;
 const TIME_TO_BE_ISOLATED: number = 10000;
 const INFECTION_LIFETIME: number = 30000;
@@ -50,6 +51,7 @@ export class Elf extends TrackableObject {
     footprints: Footprint[] = [];
     gameComponent: GameCanvasComponent;
     currentFrame: number = 0;
+    animationProgress: number = 0;
     holdFrame: boolean = false;//Used to half the walk rate when walking
 
     frameHeight: number = 260;
@@ -121,7 +123,7 @@ export class Elf extends TrackableObject {
                     this.lastChangeOfDirection = thisTime;
                 }
                 this.dirInputs.getWalkDirFromInput(this.walkDir, true);
-                this.gPos.translate(this.walkDir);
+                this.gPos.translate(this.walkDir.multiply(this.gameComponent.deltaTime/WALKSPEED));
                 this.gameComponent.gridManager.addObject(this);
             }else if (this.isolate &&  thisTime - this.timeIsolated > TIME_TO_BE_ISOLATED){
                 this.isolated = false;
@@ -259,7 +261,7 @@ export class Elf extends TrackableObject {
                 this.currentImage = this.idleSideImage;
             }
             srcY = 0;
-            this.currentFrame = 0;
+            this.animationProgress = 0;
         }else{
             //Walking,
             //Work out which directions animation to use
@@ -274,11 +276,16 @@ export class Elf extends TrackableObject {
             }else{
                 this.currentImage = this.frontWalkImage
             }
-            this.holdFrame = sprinting ? false : !this.holdFrame;
-            this.currentFrame =  directionChanged ? 0 : this.currentFrame;
-            srcY = this.currentFrame * this.frameHeight;
+            this.animationProgress = directionChanged ? 0 : this.animationProgress;
+            let sprint = this.dirInputs.sprint;
             let noOfWalkingFrames = headingSideways ? NO_OF_SIDE_WALK_FRAMES : NO_OF_FRONT_WALK_FRAMES;
-            this.currentFrame = (this.currentFrame+(this.holdFrame?0:1))%noOfWalkingFrames;
+            this.currentFrame = Math.floor((sprint?RUN_ANIMATION_SPEED:WALK_ANIMATION_SPEED) * this.animationProgress / 1000)%noOfWalkingFrames;
+            // this.currentFrame = Math.floor(this.animationProgress)
+            srcY = this.currentFrame * this.frameHeight;
+            let deltaTime = this.gameComponent.deltaTime;
+            this.animationProgress = (this.animationProgress + deltaTime)%1000;
+            
+            //this.animationProgress = ((this.animationProgress+((sprint?RUN_ANIMATION_SPEED:WALK_ANIMATION_SPEED)/deltaTime))/1000)%noOfWalkingFrames;
         }
 
         if (this.isNPC) {
@@ -327,7 +334,7 @@ export class Elf extends TrackableObject {
             this.gameComponent.context.fillText(`${destX} ${destY}`, destX, destY+20);
             this.gameComponent.context.fillText(`${this.gameComponent.gridManager.getCellFromObject(this)?.coord.toString()}`, destX, destY+40);
             this.gameComponent.context.fillText(this.getStringFromHealthState(this.healthState), destX, destY+60);
-            this.gameComponent.context.fillText(`Contact made: ${this.contactedIllElf}`, destX, destY+80)
+            this.gameComponent.context.fillText(`Contact made: ${this.contactedIllElf}`, destX, destY+80);
         }
     }
 

@@ -96,6 +96,10 @@ export class Vector2d {
         return this;
     }
 
+    public multiply(multiplier: number): Vector2d {
+        return new Vector2d(this.x * multiplier, this.y * multiplier);
+    }
+
     public doubleThis(): Vector2d {
         this.x = this.x * 2;
         this.y = this.y * 2;
