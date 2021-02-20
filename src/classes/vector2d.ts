@@ -1,3 +1,5 @@
+import { CardinalDirection } from "src/models/CardinalDirection";
+
 export class Vector2d {
 
     public x: number;
@@ -57,26 +59,50 @@ export class Vector2d {
         return new Vector2d(Math.sign(this.x), Math.sign(this.y));
     }
 
-    public getImageRotation(): number{//Returns in Degrees
+    public getCardinalDirection(): CardinalDirection{
         let signDir = this.getSign();
-        console.log("signDir: ",signDir);
         if (signDir.x == 0 && signDir.y == -1) {
-            return 0;
+            return CardinalDirection.NORTH;
         } else if (signDir.x == 1 && signDir.y == -1) {
-            return 45;
+            return CardinalDirection.NORTH_EAST;
         } else if (signDir.x == 1 && signDir.y == 0) {
-            return 90;
+            return CardinalDirection.EAST;
         } else if (signDir.x == 1 && signDir.y == 1) {
-            return 135;
+            return CardinalDirection.SOUTH_EAST;
         } else if (signDir.x == 0 && signDir.y == 1) {
-            return 180;
+            return CardinalDirection.SOUTH;
         } else if (signDir.x == -1 && signDir.y == 1) {
-            return 225;
+            return CardinalDirection.SOUTH_WEST;
         } else if (signDir.x == -1 && signDir.y == 0) {
-            return 270;
+            return CardinalDirection.WEST;
         } else if (signDir.x == -1 && signDir.y == -1) {
-            return 315;
+            return CardinalDirection.NORTH_WEST;
         } else {
+            //Illegal position
+            return null;
+        }
+    }
+
+    public getImageRotation(): number{//Returns in Degrees
+        let direction: CardinalDirection = this.getCardinalDirection();
+        switch(direction){
+        case (CardinalDirection.NORTH):
+            return 0;
+        case (CardinalDirection.NORTH_EAST):
+            return 45;
+        case (CardinalDirection.EAST):
+            return 90;
+        case (CardinalDirection.SOUTH_EAST):
+            return 135;
+        case (CardinalDirection.SOUTH):
+            return 180;
+        case (CardinalDirection.SOUTH_WEST):
+            return 225;
+        case (CardinalDirection.WEST):
+            return 270;
+        case (CardinalDirection.NORTH_WEST):
+            return 315;
+        default:
             //Illegal position
             return 0;
         }

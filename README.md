@@ -9,12 +9,16 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 - Write the story
 - Add Sound Spatial Effects
 - Limit too many refill stations spawning off-screen
+- Limit too many max elves spawning off-screen
 - Implement a more propper pause feature
 - Implement destination/time target in order to facilitate online play down the road
 - Calculate the R rate
 - Introduce anti-vax character
 - Text typing animation for dialogue
 - Ensure speed of play is normalised
+- Make elves partner socialise, perhaps talk
+- Make elves cough
+- Add particle splash for newly infected elf
 
 ## BUGS:
 
