@@ -8,23 +8,23 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 
 - Limit too many refill stations spawning off-screen (P1)
 - Limit too many max elves spawning off-screen (P1)
+- Add particle splash for newly infected elf (P1)
 - Implement destination/time target (P1)
 - Calculate the R rate, display on screen (P1)
 - Text typing animation for dialogue (P1)
 - Write the story (P2)
 - Add Sound Spatial Effects (P2)
 - Implement a more propper pause feature, automatically triggered by loss of window focus (P2)
+- Make elves partner socialise, perhaps talk (P2)
+- Make elves cough (P2)
 - Introduce anti-vax character (P3)
-- Make elves partner socialise, perhaps talk
-- Make elves cough
-- Add particle splash for newly infected elf
-- Stop infected elves from sprinting
+- Stop infected elves from sprinting? (P3)
 
 ## BUGS:
 
-- Not convinced Elves are being removed from screen
-- Footprints dissapear intantly if an elf despawns (need to be referenced globally)
-- Refill Stations spawns and despawns are visible in viewport due to their size
+- Not convinced Elves are being removed from screen (P1)
+- Refill Stations spawns and despawns are visible in viewport due to their size (P2)
+- Footprints dissapear intantly if an elf despawns (need to be referenced globally) (P3)
 
 ## IDEAS:
 
