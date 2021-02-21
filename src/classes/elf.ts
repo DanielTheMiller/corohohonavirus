@@ -9,7 +9,8 @@ import { ImageRef } from "src/models/ImageRef";
 
 const NO_OF_SIDE_WALK_FRAMES = 17;
 const NO_OF_FRONT_WALK_FRAMES = 8;
-const WALKSPEED = 50;//IN PIXELS PER SECOND
+const WALKSPEED = 200;//IN PIXELS PER SECOND
+const RUNSPEED = 300;//IN PIXELS PER SECOND
 const WALK_ANIMATION_SPEED = 24;//IN FRAMES PER SECOND
 const RUN_ANIMATION_SPEED = 48;//IN FRAMES PER SECOND
 const TIME_BETWEEN_STEPS: number = 200;
@@ -39,9 +40,10 @@ export class Elf extends TrackableObject {
     illTokenImage: HTMLImageElement;
     vacinatedTokenImage: HTMLImageElement;
 
+    dirInputs: InputDirections
+
     lookDir: Vector2d = new Vector2d();
     walkDir: Vector2d = new Vector2d();
-    dirInputs: InputDirections = new InputDirections();
 
     timeContacted: number;
     timeIsolated: number;
@@ -62,6 +64,7 @@ export class Elf extends TrackableObject {
 
     constructor(gameComponent: GameCanvasComponent, npc: boolean = false, position: Vector2d = new Vector2d(), healthState=ElfHealthState.NOT_VACINATED, keepStill=false){
         super(position, TrackableObjectType.Elf);
+        this.dirInputs = new InputDirections(gameComponent);
         this.id = noOfElvesSpawned++;
         let assetManager = gameComponent.assetManager;
         this.gameComponent = gameComponent;
@@ -123,7 +126,8 @@ export class Elf extends TrackableObject {
                     this.lastChangeOfDirection = thisTime;
                 }
                 this.dirInputs.getWalkDirFromInput(this.walkDir, true);
-                this.gPos.translate(this.walkDir.multiply(this.gameComponent.deltaTime/WALKSPEED));
+                let topSpeed = this.dirInputs.sprint ? RUNSPEED : WALKSPEED;
+                this.gPos.translate(this.walkDir.multiply(this.gameComponent.deltaTime*topSpeed));
                 this.gameComponent.gridManager.addObject(this);
             }else if (this.isolate &&  thisTime - this.timeIsolated > TIME_TO_BE_ISOLATED){
                 this.isolated = false;
@@ -144,7 +148,9 @@ export class Elf extends TrackableObject {
                 }
             }
         } else {
-            this.gPos.translate(this.walkDir);
+            this.dirInputs.getWalkDirFromInput(this.walkDir, true);
+            let topSpeed = this.dirInputs.sprint ? RUNSPEED : WALKSPEED;
+            this.gPos.translate(this.walkDir.multiply(this.gameComponent.deltaTime*topSpeed));
         }
         
         let footprintRequired = false;
@@ -279,11 +285,11 @@ export class Elf extends TrackableObject {
             this.animationProgress = directionChanged ? 0 : this.animationProgress;
             let sprint = this.dirInputs.sprint;
             let noOfWalkingFrames = headingSideways ? NO_OF_SIDE_WALK_FRAMES : NO_OF_FRONT_WALK_FRAMES;
-            this.currentFrame = Math.floor((sprint?RUN_ANIMATION_SPEED:WALK_ANIMATION_SPEED) * this.animationProgress / 1000)%noOfWalkingFrames;
+            this.currentFrame = Math.floor((sprint?RUN_ANIMATION_SPEED:WALK_ANIMATION_SPEED) * this.animationProgress)%noOfWalkingFrames;
             // this.currentFrame = Math.floor(this.animationProgress)
             srcY = this.currentFrame * this.frameHeight;
             let deltaTime = this.gameComponent.deltaTime;
-            this.animationProgress = (this.animationProgress + deltaTime)%1000;
+            this.animationProgress = (this.animationProgress + deltaTime)%1;
             
             //this.animationProgress = ((this.animationProgress+((sprint?RUN_ANIMATION_SPEED:WALK_ANIMATION_SPEED)/deltaTime))/1000)%noOfWalkingFrames;
         }

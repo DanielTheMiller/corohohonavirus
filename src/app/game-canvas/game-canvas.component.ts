@@ -12,7 +12,6 @@ import { GridManager } from 'src/classes/GridManager';
 import { TrackableObject, TrackableObjectType } from 'src/classes/TrackableObject';
 import { GameStateManager } from 'src/services/GameStateManager';
 import { ElfHealthState } from 'src/models/ElfHealthState';
-import { ImageRef } from 'src/models/ImageRef';
 
 const ELF_SPAWN_INTERVAL: number = 2500;
 const REFILL_SPAWN_INTERVAL: number = 15000;
@@ -46,7 +45,7 @@ export class GameCanvasComponent implements AfterViewInit {
   gridManager: GridManager;
   gameStateManager: GameStateManager;
   
-  inputDirection:InputDirections = new InputDirections();
+  inputDirection:InputDirections = new InputDirections(this);
   key:string = "";
   ngZone: NgZone;
   nippleManager;
@@ -93,21 +92,17 @@ export class GameCanvasComponent implements AfterViewInit {
     }
     if (thisTime - this.timeLastAmmoStationSpawned > REFILL_SPAWN_INTERVAL){
       let projectileType:ProjectileType;
-      let stationImage: HTMLImageElement;
       switch(Math.ceil(Math.random()*3)){
         case(1):{
           projectileType = ProjectileType.BULLET;
-          stationImage = this.assetManager.getImage(ImageRef.BULLET_STATION);
           break;
         }
         case(2):{
           projectileType = ProjectileType.ICECUBE;
-          stationImage = this.assetManager.getImage(ImageRef.SNOW_STATION);
           break;
         }
         case(3):{
           projectileType = ProjectileType.SYRINGE;
-          stationImage = this.assetManager.getImage(ImageRef.VACINE_STATION);
           break;
         }
       }
@@ -216,7 +211,7 @@ export class GameCanvasComponent implements AfterViewInit {
  
   updateDeltaTime() {
     let currentFrameTime = new Date().getTime();
-    this.deltaTime = currentFrameTime - this.latestFrameTime;
+    this.deltaTime = (currentFrameTime - this.latestFrameTime) / 1000;
     this.latestFrameTime = currentFrameTime;
   }
 
